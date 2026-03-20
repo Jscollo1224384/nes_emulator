@@ -32,6 +32,12 @@ int cpu_step(CPU *cpu, uint8_t *mem)
             cpu->N = (cpu->A & 0x80) ? 1 : 0;
             return 2;  // 2 cycles
 
+        case 0xA5: // LDA zero page
+            cpu->A = mem[operand];
+            cpu->Z = (cpu->A == 0);
+            cpu->N = (cpu->A & 0x80) ? 1 : 0;
+            return 3;
+
         case 0x85: // STA zero page
             mem[operand] = cpu->A;
             return 3;
