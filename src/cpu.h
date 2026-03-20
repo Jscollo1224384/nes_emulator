@@ -12,6 +12,6 @@ typedef struct {
 } CPU;
 
 void cpu_reset(CPU *cpu, uint8_t *mem);
-int  cpu_step(CPU *cpu, const uint8_t *mem);   // returns cycles consumed
+int  cpu_step(CPU *cpu, uint8_t *mem);   // returns cycles consumed
 
 #endif
