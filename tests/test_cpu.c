@@ -93,12 +93,61 @@ void test_LDA_immediate_clears_negative_flag(void)
     TEST_ASSERT_EQUAL(0, cpu.N);
 }
 
+void test_STA_zeropage_stores_accumulator(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+
+
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0x42;
+    mem[0x8002] = 0x85;
+    mem[0x8003] = 0x10;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0x42, mem[0x0010]);
+}
+
+void test_STA_zeropage_returns_three_cycles(void)
+{ CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+
+
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0x42;
+    mem[0x8002] = 0x85;
+    mem[0x8003] = 0x10;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    int cycles = cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(3, cycles);
+}
+
 int main(void) {
+
     UNITY_BEGIN();
+    //LDA Tests
     RUN_TEST(test_LDA_immediate_loads_accumulator);
     RUN_TEST(test_LDA_immediate_sets_zero_flag);
     RUN_TEST(test_LDA_immediate_sets_negative_flag);
     RUN_TEST(test_LDA_immediate_clears_zero_flag);
     RUN_TEST(test_LDA_immediate_clears_negative_flag);
+
+    //STA Tests
+    RUN_TEST(test_STA_zeropage_stores_accumulator);
+    RUN_TEST(test_STA_zeropage_returns_three_cycles);
     return UNITY_END();
 }
