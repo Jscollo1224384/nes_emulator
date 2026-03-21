@@ -3,7 +3,6 @@
 // LDA immediate (0xA9) - Load accumulator with immediate value
 int op_lda_immediate(CPU *cpu, uint8_t *mem) {
     uint8_t operand = mem[cpu->PC++];
-    (void)mem;  // Unused parameter
     cpu->A = operand;
     cpu->Z = (cpu->A == 0);
     cpu->N = (cpu->A & 0x80) ? 1 : 0;
