@@ -26,9 +26,8 @@ int op_sta_zero_page(CPU *cpu, uint8_t *mem) {
 }
 
 // Default handler for unimplemented opcodes
-int op_unimplemented(CPU *cpu, uint8_t *mem) {
+int op_unimplemented(CPU *cpu, uint8_t) {
     (void)cpu;
-    (void)mem;  // Suppress unused parameter warnings
     return 1;  // Return 1 cycle as placeholder
 }
 

@@ -23,6 +23,6 @@ int op_lda_zero_page(CPU *cpu, uint8_t *mem);
 int op_sta_zero_page(CPU *cpu, uint8_t *mem);
 
 // Default handler for unimplemented opcodes
-int op_unimplemented(CPU *cpu, uint8_t *mem);
+int op_unimplemented(CPU *cpu, uint8_t);
 
 #endif
