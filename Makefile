@@ -2,7 +2,7 @@ CC="C:\Projects\nes_emulator\nes_emulator\mingw\mingw64\bin\gcc.exe"
 CFLAGS=-I. -Isrc -Itests -Itests/unity -std=c11 -Wall -Wextra
 
 # Source files
-SRCS=src/cpu.c
+SRCS=src/cpu.c src/opcodes.c
 TEST_SRCS=tests/test_cpu.c tests/unity/unity.c
 
 # Object files

@@ -7,6 +7,7 @@ set(CMAKE_C_STANDARD 11)
 add_executable(nes_emulator
         src/main.c
         src/cpu.c
+        src/opcodes.c
 )
 
 # ── Test: CPU ──────────────────────────────────────────────
@@ -14,6 +15,7 @@ add_executable(test_cpu
         tests/test_cpu.c
         tests/unity/unity.c
         src/cpu.c
+        src/opcodes.c
 )
 
 target_include_directories(test_cpu PRIVATE

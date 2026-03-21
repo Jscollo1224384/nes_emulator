@@ -1,4 +1,6 @@
+#include <stdio.h>
 #include "cpu.h"
+#include "opcodes.h"
 
 // Reset CPU to initial state
 void cpu_reset(CPU *cpu, uint8_t *mem) {
@@ -23,27 +25,13 @@ void cpu_reset(CPU *cpu, uint8_t *mem) {
 int cpu_step(CPU *cpu, uint8_t *mem)
 {
     uint8_t opcode = mem[cpu->PC++];
-    uint8_t operand = mem[cpu->PC++];
-
-    switch (opcode){
-        case 0xA9:  // LDA immediate
-            cpu->A = operand;
-            cpu->Z = (cpu->A == 0);
-            cpu->N = (cpu->A & 0x80) ? 1 : 0;
-            return 2;  // 2 cycles
-
-        case 0xA5: // LDA zero page
-            cpu->A = mem[operand];
-            cpu->Z = (cpu->A == 0);
-            cpu->N = (cpu->A & 0x80) ? 1 : 0;
-            return 3;
-
-        case 0x85: // STA zero page
-            mem[operand] = cpu->A;
-            return 3;
-
-        default:
-            // For now, just return 1 cycle for unimplemented opcodes
-            return 1;
+    const OpcodeEntry *entry = &opcode_table[opcode];
+    
+    // Handle unimplemented opcodes
+    if (entry->handler == NULL) {
+        return op_unimplemented(cpu, mem);
     }
+    
+    // Execute via function pointer (handler fetches its own operands)
+    return entry->handler(cpu, mem);
 }
