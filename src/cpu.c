@@ -29,15 +29,9 @@ int cpu_step(CPU *cpu, uint8_t *mem)
     
     // Handle unimplemented opcodes
     if (entry->handler == NULL) {
-        return op_unimplemented(cpu, mem, 0);
+        return op_unimplemented(cpu, mem);
     }
     
-    // Fetch operand (for 2-byte instructions)
-    uint8_t operand = 0;
-    if (entry->bytes > 1) {
-        operand = mem[cpu->PC++];
-    }
-    
-    // Execute via function pointer
-    return entry->handler(cpu, mem, operand);
+    // Execute via function pointer (handler fetches its own operands)
+    return entry->handler(cpu, mem);
 }
