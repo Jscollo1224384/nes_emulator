@@ -10,7 +10,6 @@ typedef int (*OpcodeHandler)(CPU *cpu, uint8_t *mem);
 // Struct to hold handler + metadata
 typedef struct {
     OpcodeHandler handler;
-    uint8_t cycles;           // Base cycle count
     const char *name;         // For debugging
 } OpcodeEntry;
 
