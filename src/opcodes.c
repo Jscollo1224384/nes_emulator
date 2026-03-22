@@ -35,7 +35,7 @@ int op_unimplemented(CPU *cpu, uint8_t *mem) {
 // 256-entry lookup table indexed by opcode
 // Using designated initializers - all unmentioned entries default to 0 (null handler)
 const OpcodeEntry opcode_table[256] = {
-    [0xA9] = { op_lda_immediate, 2, "LDA immediate" },
-    [0xA5] = { op_lda_zero_page, 3, "LDA zero page" },
-    [0x85] = { op_sta_zero_page, 3, "STA zero page" },
+    [0xA9] = { op_lda_immediate, "LDA immediate" },
+    [0xA5] = { op_lda_zero_page, "LDA zero page" },
+    [0x85] = { op_sta_zero_page, "STA zero page" },
 };
