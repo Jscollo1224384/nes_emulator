@@ -20,6 +20,7 @@ extern const OpcodeEntry opcode_table[256];
 int op_lda_immediate(CPU *cpu, uint8_t *mem);
 int op_lda_zero_page(CPU *cpu, uint8_t *mem);
 int op_lda_zero_page_x(CPU *cpu, uint8_t *mem);
+int op_lda_absolute_x(CPU *cpu, uint8_t *mem);
 int op_sta_zero_page(CPU *cpu, uint8_t *mem);
 
 // Default handler for unimplemented opcodes

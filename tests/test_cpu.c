@@ -480,6 +480,154 @@ void test_LDA_zeropage_x_wraps_around_zero_page(void)
     TEST_ASSERT_EQUAL(0x42, cpu.A);
 }
 
+/** Absolute X tests ***********************************************************************/
+void test_LDA_absolute_x_loads_accumulator(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xBD;
+    mem[0x8001] = 0x00;
+    mem[0x8002] = 0x10;
+    mem[0x1005] = 0x42;
+
+    cpu_reset(&cpu, mem);
+    cpu.X = 0x05;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL_HEX8(0x42, cpu.A);
+}
+
+void test_LDA_absolute_x_sets_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xBD;
+    mem[0x8001] = 0x00;
+    mem[0x8002] = 0x10;
+    mem[0x1005] = 0x00;
+
+    cpu_reset(&cpu, mem);
+    cpu.X = 0x05;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(1, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_LDA_absolute_x_sets_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xBD;
+    mem[0x8001] = 0x00;
+    mem[0x8002] = 0x10;
+    mem[0x1005] = 0x80;
+
+    cpu_reset(&cpu, mem);
+    cpu.X = 0x05;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(1, cpu.N);
+}
+
+void test_LDA_absolute_x_clears_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xBD;
+    mem[0x8001] = 0x00;
+    mem[0x8002] = 0x10;
+    mem[0x1005] = 0x00;
+    mem[0x8003] = 0xBD;
+    mem[0x8004] = 0x00;
+    mem[0x8005] = 0x20;
+    mem[0x2005] = 0x01;
+
+    cpu_reset(&cpu, mem);
+    cpu.X = 0x05;
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_LDA_absolute_x_clears_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xBD;
+    mem[0x8001] = 0x00;
+    mem[0x8002] = 0x10;
+    mem[0x1005] = 0x80;
+    mem[0x8003] = 0xBD;
+    mem[0x8004] = 0x00;
+    mem[0x8005] = 0x20;
+    mem[0x2005] = 0x01;
+
+    cpu_reset(&cpu, mem);
+    cpu.X = 0x05;
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_LDA_absolute_x_returns_four_cycles(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xBD;
+    mem[0x8001] = 0x00;
+    mem[0x8002] = 0x10;
+    mem[0x1005] = 0x42;
+
+    cpu_reset(&cpu, mem);
+    cpu.X = 0x05;
+    int cycle = cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(4, cycle);
+}
+
+void test_LDA_absolute_x_returns_five_cycles_on_page_cross(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xBD;
+    mem[0x8001] = 0xFE;
+    mem[0x8002] = 0x10;
+    mem[0x1103] = 0x42; // Results in 0x1103 after adding x register. crosses from page $10 to $11 triggering a page cross.
+
+    cpu_reset(&cpu, mem);
+    cpu.X = 0x05;
+    int cycle = cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(5, cycle);
+}
+
 /** STA tests *****************************************************************************/
 void test_STA_zeropage_stores_accumulator(void)
 {
@@ -519,11 +667,13 @@ void test_STA_zeropage_returns_three_cycles(void)
     TEST_ASSERT_EQUAL(3, cycles);
 }
 
+
 int main(void) {
 
     UNITY_BEGIN();
     //LDA Tests
-    //Addressing Mode - Immediate
+    //Addressing Mode
+    //Immediate
     RUN_TEST(test_LDA_immediate_loads_accumulator);
     RUN_TEST(test_LDA_immediate_sets_zero_flag);
     RUN_TEST(test_LDA_immediate_sets_negative_flag);
@@ -552,8 +702,17 @@ int main(void) {
     RUN_TEST(test_LDA_zeropage_x_clears_negative_flag);
     RUN_TEST(test_LDA_zeropage_x_returns_four_cycles);
     RUN_TEST(test_LDA_zeropage_x_wraps_around_zero_page);
+    //Absolute X
+    RUN_TEST(test_LDA_absolute_x_loads_accumulator);
+    RUN_TEST(test_LDA_absolute_x_sets_zero_flag);
+    RUN_TEST(test_LDA_absolute_x_sets_negative_flag);
+    RUN_TEST(test_LDA_absolute_x_clears_zero_flag);
+    RUN_TEST(test_LDA_absolute_x_clears_negative_flag);
+    RUN_TEST(test_LDA_absolute_x_returns_four_cycles);
+    RUN_TEST(test_LDA_absolute_x_returns_five_cycles_on_page_cross);
     //STA Tests
     RUN_TEST(test_STA_zeropage_stores_accumulator);
     RUN_TEST(test_STA_zeropage_returns_three_cycles);
+
     return UNITY_END();
 }

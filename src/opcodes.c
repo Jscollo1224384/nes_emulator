@@ -43,6 +43,20 @@ int op_lda_zero_page_x(CPU *cpu, uint8_t *mem)
     cpu->N = (cpu->A & 0x80) ? 1 : 0;
     return 4;
 }
+
+// LDA absolute x (0xBD) - Adds x register to a full 16-bit memory address
+int op_lda_absolute_x(CPU *cpu, uint8_t *mem)
+{
+    uint8_t lo = mem[cpu->PC++];
+    uint8_t hi = mem[cpu->PC++];
+    uint16_t address = (uint16_t)(hi << 8) | lo;
+    uint16_t effective_address = (uint16_t)(address + cpu->X);
+    cpu->A = mem[effective_address];
+    cpu->Z = (cpu->A == 0);
+    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    int page_crossed = (address & 0xFF00) != (effective_address & 0xFF00);
+    return page_crossed ? 5 : 4;
+}
 // STA zero page (0x85) - Store accumulator to zero page memory
 int op_sta_zero_page(CPU *cpu, uint8_t *mem)
 {
@@ -66,5 +80,6 @@ const OpcodeEntry opcode_table[256] = {
     [0xA5] = { op_lda_zero_page,   "LDA zero page"   },
     [0xAD] = { op_lda_absolute,    "LDA absolute"    },
     [0xB5] = { op_lda_zero_page_x, "LDA zero page X" },
+    [0xBD] = { op_lda_absolute_x,  "LDA absolute X"  },
     [0x85] = { op_sta_zero_page,   "STA zero page"   },
 };
