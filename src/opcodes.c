@@ -120,17 +120,29 @@ int op_sta_absolute_y(CPU *cpu, uint8_t *mem)
     return 5;
 }
 
-//STA indirect X (0x81) -
+//STA indirect X (0x81) -  Store accumulator to address pointed to by zero page pointer offset by X
 int op_sta_indirect_x(CPU *cpu, uint8_t *mem)
 {
-    uint8_t b = mem[cpu->PC++];
-    uint8_t lo = b;
-    uint8_t hi = mem[cpu->PC++];
+    uint8_t operand = mem[cpu->PC++]; //step 1
+    uint8_t zp_index = (uint8_t)(operand + cpu->X); //step2
+    uint8_t lo = mem[zp_index];
+    uint8_t hi = mem[(uint8_t)(zp_index + 1)];
     uint16_t address = (uint16_t)(hi << 8) | lo;
-    uint16_t effective_address = (uint16_t)(address + cpu->X);
-    mem[effective_address] = cpu->A;
+    mem[address] = cpu->A;
     return 6;
 }
+
+//STA indirect Y (0x(91) -  Store accumulator to address pointed to by zero page pointer offset by Y
+int op_sta_indirect_y(CPU *cpu, uint8_t *mem)
+{
+    uint8_t operand = mem[cpu->PC++]; //step 1
+    uint8_t lo = mem[operand];
+    uint8_t hi = mem[(uint8_t)(operand + 1)];
+    uint16_t address = ((uint16_t)(hi << 8) | lo) + cpu->Y;
+    mem[address] = cpu->A;
+    return 6;
+}
+
 
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
@@ -154,5 +166,6 @@ const OpcodeEntry opcode_table[256] = {
     [0x8D] = { op_sta_absolute,    "STA absolute"    },
     [0x9D] = { op_sta_absolute_x,  "STA absolute X " },
     [0x99] = { op_sta_absolute_y,  "STA absolute Y " },
-    [0x81] = { op_sta_indirect_x,  "STA indirect X"}
+    [0x81] = { op_sta_indirect_x,  "STA indirect X"  },
+    [0x91] = { op_sta_indirect_y,  "STA indirect Y"  }
 };
