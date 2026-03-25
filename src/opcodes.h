@@ -24,6 +24,13 @@ int op_lda_absolute_x(CPU *cpu, uint8_t *mem);
 int op_lda_absolute_y(CPU *cpu, uint8_t *mem);
 int op_sta_zero_page(CPU *cpu, uint8_t *mem);
 int op_sta_zero_page_x(CPU *cpu, uint8_t *mem);
+int op_sta_absolute(CPU *cpu, uint8_t *mem);
+int op_sta_absolute_x(CPU *cpu, uint8_t *mem);
+int op_sta_absolute_y(CPU *cpu, uint8_t *mem);
+int op_sta_indirect_x(CPU *cpu, uint8_t *mem);
+int op_sta_indirect_y(CPU *cpu, uint8_t *mem);
+
+
 
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem);
