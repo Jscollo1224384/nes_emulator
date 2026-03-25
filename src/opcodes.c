@@ -1,41 +1,121 @@
 #include "opcodes.h"
 
+//All opcode functions return cycles;
+
 // LDA immediate (0xA9) - Load accumulator with immediate value
-int op_lda_immediate(CPU *cpu, uint8_t *mem) {
+int op_lda_immediate(CPU *cpu, uint8_t *mem)
+{
     uint8_t operand = mem[cpu->PC++];
     cpu->A = operand;
     cpu->Z = (cpu->A == 0);
     cpu->N = (cpu->A & 0x80) ? 1 : 0;
-    return 2;  // 2 cycles
+    return 2;
 }
 
 // LDA zero page (0xA5) - Load accumulator from zero page memory
-int op_lda_zero_page(CPU *cpu, uint8_t *mem) {
+int op_lda_zero_page(CPU *cpu, uint8_t *mem)
+{
     uint8_t address = mem[cpu->PC++];
     cpu->A = mem[address];
     cpu->Z = (cpu->A == 0);
     cpu->N = (cpu->A & 0x80) ? 1 : 0;
-    return 3;  // 3 cycles
+    return 3;
+}
+
+// LDA absolute (0xAD) - Load accumulator from a full 16-bit memory address
+int op_lda_absolute(CPU *cpu, uint8_t *mem)
+{
+    uint8_t lo = mem[cpu->PC++];
+    uint8_t hi = mem[cpu->PC++];
+    uint16_t address = (uint16_t)(hi << 8) | lo;
+    cpu->A = mem[address];
+    cpu->Z = (cpu->A == 0);
+    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    return 4;
+}
+
+// LDA zero page x (0xB5) - Adds x register to base address
+int op_lda_zero_page_x(CPU *cpu, uint8_t *mem)
+{
+    uint8_t address = mem[cpu->PC++];
+    cpu->A = mem[(uint8_t)(address + cpu->X)]; //cast as uint8_t to maintain 8 bits and keep zero page.
+    cpu->Z = (cpu->A == 0);
+    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    return 4;
+}
+
+// LDA absolute x (0xBD) - Adds x register to a full 16-bit memory address
+int op_lda_absolute_x(CPU *cpu, uint8_t *mem)
+{
+    uint8_t lo = mem[cpu->PC++];
+    uint8_t hi = mem[cpu->PC++];
+    uint16_t address = (uint16_t)(hi << 8) | lo;
+    uint16_t effective_address = (uint16_t)(address + cpu->X);
+    cpu->A = mem[effective_address];
+    cpu->Z = (cpu->A == 0);
+    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    int page_crossed = (address & 0xFF00) != (effective_address & 0xFF00);
+    return page_crossed ? 5 : 4;
+}
+
+// LDA absolute y (0xB9) - Adds y register to a full 16-bit memory address
+int op_lda_absolute_y(CPU *cpu, uint8_t *mem)
+{
+    uint8_t lo = mem[cpu->PC++];
+    uint8_t hi = mem[cpu->PC++];
+    uint16_t address = (uint16_t)(hi << 8) | lo;
+    uint16_t effective_address = (uint16_t)(address + cpu->Y);
+    cpu->A = mem[effective_address];
+    cpu->Z = (cpu->A == 0);
+    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    int page_crossed = (address & 0xFF00) != (effective_address & 0xFF00);
+    return page_crossed ? 5 : 4;
 }
 
 // STA zero page (0x85) - Store accumulator to zero page memory
-int op_sta_zero_page(CPU *cpu, uint8_t *mem) {
+int op_sta_zero_page(CPU *cpu, uint8_t *mem)
+{
     uint8_t address = mem[cpu->PC++];
     mem[address] = cpu->A;
-    return 3;  // 3 cycles
+    return 3;
+}
+
+// STA zero page x (0x95)
+int op_sta_zero_page_x(CPU *cpu, uint8_t *mem)
+{
+    uint8_t address = mem[cpu->PC++];
+    mem[(uint8_t)(address + cpu->X)] = cpu->A; //cast as uint8_t to maintain 8 bits and keep zero page.
+    return 4;
+}
+
+// STA absolute (0x8D) - Store accumulator to a full 16-bit memory address
+int op_sta_absolute(CPU *cpu, uint8_t *mem)
+{
+    uint8_t lo = mem[cpu->PC++];
+    uint8_t hi = mem[cpu->PC++];
+    uint16_t address = (uint16_t)(hi << 8) | lo;
+    mem[address] = cpu->A;
+    return 4;
 }
 
 // Default handler for unimplemented opcodes
-int op_unimplemented(CPU *cpu, uint8_t *mem) {
+int op_unimplemented(CPU *cpu, uint8_t *mem)
+{
     (void)cpu;
     (void)mem;  // Suppress unused parameter warnings
-    return 1;  // Return 1 cycle as placeholder
+    return 1;
 }
 
 // 256-entry lookup table indexed by opcode
 // Using designated initializers - all unmentioned entries default to 0 (null handler)
 const OpcodeEntry opcode_table[256] = {
-    [0xA9] = { op_lda_immediate, "LDA immediate" },
-    [0xA5] = { op_lda_zero_page, "LDA zero page" },
-    [0x85] = { op_sta_zero_page, "STA zero page" },
+    [0xA9] = { op_lda_immediate,   "LDA immediate"   },
+    [0xA5] = { op_lda_zero_page,   "LDA zero page"   },
+    [0xAD] = { op_lda_absolute,    "LDA absolute"    },
+    [0xB5] = { op_lda_zero_page_x, "LDA zero page X" },
+    [0xBD] = { op_lda_absolute_x,  "LDA absolute X"  },
+    [0xB9] = { op_lda_absolute_y,  "LDA absolute Y"  },
+    [0x85] = { op_sta_zero_page,   "STA zero page"   },
+    [0x95] = { op_sta_zero_page_x, "STA zero page x" },
+    [0x8D] = { op_sta_absolute,     "STA absolute"   }
 };
