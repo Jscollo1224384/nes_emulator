@@ -58,7 +58,7 @@ int op_lda_absolute_x(CPU *cpu, uint8_t *mem)
     return page_crossed ? 5 : 4;
 }
 
-// LDA absolute y (0xB9) - Adds y register to a full 16-bit memory address
+// LDA absolute Y (0xB9) - Adds Y register to a full 16-bit memory address
 int op_lda_absolute_y(CPU *cpu, uint8_t *mem)
 {
     uint8_t lo = mem[cpu->PC++];
@@ -80,7 +80,7 @@ int op_sta_zero_page(CPU *cpu, uint8_t *mem)
     return 3;
 }
 
-// STA zero page x (0x95)
+// STA zero page X (0x95)
 int op_sta_zero_page_x(CPU *cpu, uint8_t *mem)
 {
     uint8_t address = mem[cpu->PC++];
@@ -96,6 +96,40 @@ int op_sta_absolute(CPU *cpu, uint8_t *mem)
     uint16_t address = (uint16_t)(hi << 8) | lo;
     mem[address] = cpu->A;
     return 4;
+}
+
+// STA absolute X (0x9D) - Store accumulator to a full 16-bit address offset by X
+int op_sta_absolute_x(CPU *cpu, uint8_t *mem)
+{
+    uint8_t lo = mem[cpu->PC++];
+    uint8_t hi = mem[cpu->PC++];
+    uint16_t address = (uint16_t)(hi << 8) | lo;
+    uint16_t effective_address = (uint16_t)(address + cpu->X);
+    mem[effective_address] = cpu->A;
+    return 5;
+}
+
+// STA absolute Y (0x99) - Store accumulator to a full 16-bit address offset by Y
+int op_sta_absolute_y(CPU *cpu, uint8_t *mem)
+{
+    uint8_t lo = mem[cpu->PC++];
+    uint8_t hi = mem[cpu->PC++];
+    uint16_t address = (uint16_t)(hi << 8) | lo;
+    uint16_t effective_address = (uint16_t)(address + cpu->Y);
+    mem[effective_address] = cpu->A;
+    return 5;
+}
+
+//STA indirect X (0x81) -
+int op_sta_indirect_x(CPU *cpu, uint8_t *mem)
+{
+    uint8_t b = mem[cpu->PC++];
+    uint8_t lo = b;
+    uint8_t hi = mem[cpu->PC++];
+    uint16_t address = (uint16_t)(hi << 8) | lo;
+    uint16_t effective_address = (uint16_t)(address + cpu->X);
+    mem[effective_address] = cpu->A;
+    return 6;
 }
 
 // Default handler for unimplemented opcodes
@@ -116,6 +150,9 @@ const OpcodeEntry opcode_table[256] = {
     [0xBD] = { op_lda_absolute_x,  "LDA absolute X"  },
     [0xB9] = { op_lda_absolute_y,  "LDA absolute Y"  },
     [0x85] = { op_sta_zero_page,   "STA zero page"   },
-    [0x95] = { op_sta_zero_page_x, "STA zero page x" },
-    [0x8D] = { op_sta_absolute,     "STA absolute"   }
+    [0x95] = { op_sta_zero_page_x, "STA zero page X" },
+    [0x8D] = { op_sta_absolute,    "STA absolute"    },
+    [0x9D] = { op_sta_absolute_x,  "STA absolute X " },
+    [0x99] = { op_sta_absolute_y,  "STA absolute Y " },
+    [0x81] = { op_sta_indirect_x,  "STA indirect X"}
 };
