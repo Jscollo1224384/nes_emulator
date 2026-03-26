@@ -162,6 +162,16 @@ int op_ldx_zero_page(CPU *cpu, uint8_t *mem)
     cpu->N = (cpu->X & 0x80) ? 1 : 0;
     return 3;
 }
+
+// LDX zero page Y (0xB6) - Adds Y register to base address
+int op_ldx_zero_page_y(CPU *cpu, uint8_t *mem)
+{
+    uint8_t address = mem[cpu->PC++];
+    cpu->X = mem[(uint8_t)(address + cpu->Y)]; //cast as uint8_t to maintain 8 bits and keep zero page.
+    cpu->Z = (cpu->X == 0);
+    cpu->N = (cpu->X & 0x80) ? 1 : 0;
+    return 4;
+}
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -188,5 +198,6 @@ const OpcodeEntry opcode_table[256] = {
     [0x81] = { op_sta_indirect_x,  "STA indirect X"  },
     [0x91] = { op_sta_indirect_y,  "STA indirect Y"  },
     [0xA2] = { op_ldx_immediate,   "LDX immediate"   },
-    [0xA6] = { op_ldx_zero_page,   "LDX zero page"   }
+    [0xA6] = { op_ldx_zero_page,   "LDX zero page"   },
+    [0xB6] = { op_ldx_zero_page_y, "LDX zero page Y" }
 };

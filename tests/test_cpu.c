@@ -1349,6 +1349,144 @@ void test_LDX_zeropage_returns_three_cycles(void)
     TEST_ASSERT_EQUAL(3, cycle);
 }
 
+/** LDX zero page Y tests ****************************************************************************************/
+void test_LDX_zeropage_y_loads_x_register(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xB6;
+    mem[0x8001] = 0x10;
+    mem[0x0015] = 0x42;
+
+    cpu_reset(&cpu, mem);
+    cpu.Y = 0x05;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL_HEX8(0x42, cpu.X);
+}
+
+void test_LDX_zeropage_y_sets_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xB6;
+    mem[0x8001] = 0x10;
+    mem[0x0015] = 0x00;
+
+    cpu_reset(&cpu, mem);
+    cpu.Y = 0x05;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(1, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_LDX_zeropage_y_sets_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xB6;
+    mem[0x8001] = 0x10;
+    mem[0x0015] = 0x80;
+
+    cpu_reset(&cpu, mem);
+    cpu.Y = 0x05;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(1, cpu.N);
+}
+
+void test_LDX_zeropage_y_clears_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xB6;
+    mem[0x8001] = 0x10;
+    mem[0x0015] = 0x00;
+    mem[0x8002] = 0xB6;
+    mem[0x8003] = 0x15;
+    mem[0x001A] = 0x01;
+
+    cpu_reset(&cpu, mem);
+    cpu.Y = 0x05;
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_LDX_zeropage_y_clears_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xB6;
+    mem[0x8001] = 0x10;
+    mem[0x0015] = 0x80;
+    mem[0x8002] = 0xB6;
+    mem[0x8003] = 0x15;
+    mem[0x001A] = 0x01;
+
+    cpu_reset(&cpu, mem);
+    cpu.Y = 0x05;
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_LDX_zeropage_y_returns_four_cycles(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xB6;
+    mem[0x8001] = 0x10;
+    mem[0x0015] = 0x42;
+
+    cpu_reset(&cpu, mem);
+    cpu.Y = 0x05;
+    int cycle = cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(4, cycle);
+}
+
+void test_LDX_zeropage_y_wraps_around_zero_page(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xB6;
+    mem[0x8001] = 0xFB;
+    mem[0x0000] = 0x42;
+
+    cpu_reset(&cpu, mem);
+    cpu.Y = 0x05;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0x42, cpu.X);
+}
 int main(void) {
 
     UNITY_BEGIN();
@@ -1441,5 +1579,13 @@ int main(void) {
     RUN_TEST(test_LDX_zeropage_clears_zero_flag);
     RUN_TEST(test_LDX_zeropage_clears_negative_flag);
     RUN_TEST(test_LDX_zeropage_returns_three_cycles);
+    //Zero page Y
+    RUN_TEST(test_LDX_zeropage_y_loads_x_register);
+    RUN_TEST(test_LDX_zeropage_y_sets_zero_flag);
+    RUN_TEST(test_LDX_zeropage_y_sets_negative_flag);
+    RUN_TEST(test_LDX_zeropage_y_clears_zero_flag);
+    RUN_TEST(test_LDX_zeropage_y_clears_negative_flag);
+    RUN_TEST(test_LDX_zeropage_y_returns_four_cycles);
+    RUN_TEST(test_LDX_zeropage_y_wraps_around_zero_page);
     return UNITY_END();
 }
