@@ -151,6 +151,14 @@ int op_unimplemented(CPU *cpu, uint8_t *mem)
     (void)mem;  // Suppress unused parameter warnings
     return 1;
 }
+int op_ldx_immediate(CPU *cpu, uint8_t *mem)
+{
+    uint8_t operand = mem[cpu->PC++];
+    cpu->X = operand;
+    cpu->Z = (cpu->X == 0);
+    cpu->N = (cpu->X & 0x80) ? 1 : 0;
+    return 2;
+}
 
 // 256-entry lookup table indexed by opcode
 // Using designated initializers - all unmentioned entries default to 0 (null handler)
@@ -167,5 +175,6 @@ const OpcodeEntry opcode_table[256] = {
     [0x9D] = { op_sta_absolute_x,  "STA absolute X " },
     [0x99] = { op_sta_absolute_y,  "STA absolute Y " },
     [0x81] = { op_sta_indirect_x,  "STA indirect X"  },
-    [0x91] = { op_sta_indirect_y,  "STA indirect Y"  }
+    [0x91] = { op_sta_indirect_y,  "STA indirect Y"  },
+    [0xA2] = { op_ldx_immediate,   "LDX immediate"   }
 };
