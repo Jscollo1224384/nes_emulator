@@ -172,6 +172,18 @@ int op_ldx_zero_page_y(CPU *cpu, uint8_t *mem)
     cpu->N = (cpu->X & 0x80) ? 1 : 0;
     return 4;
 }
+
+// LDX absolute - (0xAE) - Load X register from a full 16-bit memory address
+int op_ldx_absolute(CPU *cpu, uint8_t *mem)
+{
+    uint8_t lo = mem[cpu->PC++];
+    uint8_t hi = mem[cpu->PC++];
+    uint16_t address = (uint16_t)(hi << 8) | lo;
+    cpu->X = mem[address];
+    cpu->Z = (cpu->X == 0);
+    cpu->N = (cpu->X & 0x80) ? 1 : 0;
+    return 4;
+}
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -199,5 +211,6 @@ const OpcodeEntry opcode_table[256] = {
     [0x91] = { op_sta_indirect_y,  "STA indirect Y"  },
     [0xA2] = { op_ldx_immediate,   "LDX immediate"   },
     [0xA6] = { op_ldx_zero_page,   "LDX zero page"   },
-    [0xB6] = { op_ldx_zero_page_y, "LDX zero page Y" }
+    [0xB6] = { op_ldx_zero_page_y, "LDX zero page Y" },
+    [0xAE] = { op_ldx_absolute,    "LDX absolute"    }
 };
