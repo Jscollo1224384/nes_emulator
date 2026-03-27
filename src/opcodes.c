@@ -143,7 +143,61 @@ int op_sta_indirect_y(CPU *cpu, uint8_t *mem)
     return 6;
 }
 
+// LDX immediate (0xA2) - Load X register with immediate value
+int op_ldx_immediate(CPU *cpu, uint8_t *mem)
+{
+    uint8_t operand = mem[cpu->PC++];
+    cpu->X = operand;
+    cpu->Z = (cpu->X == 0);
+    cpu->N = (cpu->X & 0x80) ? 1 : 0;
+    return 2;
+}
 
+//LDX zero page (0xA6) - Load X register from zero page memory
+int op_ldx_zero_page(CPU *cpu, uint8_t *mem)
+{
+    uint8_t address = mem[cpu->PC++];
+    cpu->X = mem[address];
+    cpu->Z = (cpu->X == 0);
+    cpu->N = (cpu->X & 0x80) ? 1 : 0;
+    return 3;
+}
+
+// LDX zero page Y (0xB6) - Adds Y register to base address
+int op_ldx_zero_page_y(CPU *cpu, uint8_t *mem)
+{
+    uint8_t address = mem[cpu->PC++];
+    cpu->X = mem[(uint8_t)(address + cpu->Y)]; //cast as uint8_t to maintain 8 bits and keep zero page.
+    cpu->Z = (cpu->X == 0);
+    cpu->N = (cpu->X & 0x80) ? 1 : 0;
+    return 4;
+}
+
+// LDX absolute - (0xAE) - Load X register from a full 16-bit memory address
+int op_ldx_absolute(CPU *cpu, uint8_t *mem)
+{
+    uint8_t lo = mem[cpu->PC++];
+    uint8_t hi = mem[cpu->PC++];
+    uint16_t address = (uint16_t)(hi << 8) | lo;
+    cpu->X = mem[address];
+    cpu->Z = (cpu->X == 0);
+    cpu->N = (cpu->X & 0x80) ? 1 : 0;
+    return 4;
+}
+
+// LDX absolute Y (0xBE) - Adds Y register to a full 16-bit memory address in X
+int op_ldx_absolute_y(CPU *cpu, uint8_t *mem)
+{
+    uint8_t lo = mem[cpu->PC++];
+    uint8_t hi = mem[cpu->PC++];
+    uint16_t address = (uint16_t)(hi << 8) | lo;
+    uint16_t effective_address = (uint16_t)(address + cpu->Y);
+    cpu->X = mem[effective_address];
+    cpu->Z = (cpu->X == 0);
+    cpu->N = (cpu->X & 0x80) ? 1 : 0;
+    int page_crossed = (address & 0xFF00) != (effective_address & 0xFF00);
+    return page_crossed ? 5 : 4;
+}
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -151,6 +205,9 @@ int op_unimplemented(CPU *cpu, uint8_t *mem)
     (void)mem;  // Suppress unused parameter warnings
     return 1;
 }
+
+
+
 
 // 256-entry lookup table indexed by opcode
 // Using designated initializers - all unmentioned entries default to 0 (null handler)
@@ -167,5 +224,10 @@ const OpcodeEntry opcode_table[256] = {
     [0x9D] = { op_sta_absolute_x,  "STA absolute X " },
     [0x99] = { op_sta_absolute_y,  "STA absolute Y " },
     [0x81] = { op_sta_indirect_x,  "STA indirect X"  },
-    [0x91] = { op_sta_indirect_y,  "STA indirect Y"  }
+    [0x91] = { op_sta_indirect_y,  "STA indirect Y"  },
+    [0xA2] = { op_ldx_immediate,   "LDX immediate"   },
+    [0xA6] = { op_ldx_zero_page,   "LDX zero page"   },
+    [0xB6] = { op_ldx_zero_page_y, "LDX zero page Y" },
+    [0xAE] = { op_ldx_absolute,    "LDX absolute"    },
+    [0xBE] = { op_ldx_absolute_y,  "LDX absolute Y"  }
 };
