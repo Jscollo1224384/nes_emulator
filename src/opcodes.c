@@ -184,6 +184,20 @@ int op_ldx_absolute(CPU *cpu, uint8_t *mem)
     cpu->N = (cpu->X & 0x80) ? 1 : 0;
     return 4;
 }
+
+// LDX absolute Y (0xBE) - Adds Y register to a full 16-bit memory address in X
+int op_ldx_absolute_y(CPU *cpu, uint8_t *mem)
+{
+    uint8_t lo = mem[cpu->PC++];
+    uint8_t hi = mem[cpu->PC++];
+    uint16_t address = (uint16_t)(hi << 8) | lo;
+    uint16_t effective_address = (uint16_t)(address + cpu->Y);
+    cpu->X = mem[effective_address];
+    cpu->Z = (cpu->X == 0);
+    cpu->N = (cpu->X & 0x80) ? 1 : 0;
+    int page_crossed = (address & 0xFF00) != (effective_address & 0xFF00);
+    return page_crossed ? 5 : 4;
+}
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -191,6 +205,8 @@ int op_unimplemented(CPU *cpu, uint8_t *mem)
     (void)mem;  // Suppress unused parameter warnings
     return 1;
 }
+
+
 
 
 // 256-entry lookup table indexed by opcode
@@ -212,5 +228,6 @@ const OpcodeEntry opcode_table[256] = {
     [0xA2] = { op_ldx_immediate,   "LDX immediate"   },
     [0xA6] = { op_ldx_zero_page,   "LDX zero page"   },
     [0xB6] = { op_ldx_zero_page_y, "LDX zero page Y" },
-    [0xAE] = { op_ldx_absolute,    "LDX absolute"    }
+    [0xAE] = { op_ldx_absolute,    "LDX absolute"    },
+    [0xBE] = { op_ldx_absolute_y,  "LDX absolute Y"  }
 };
