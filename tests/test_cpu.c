@@ -1761,6 +1761,109 @@ void test_LDX_absolute_y_returns_five_cycles_on_page_cross(void)
     TEST_ASSERT_EQUAL(5, cycle);
 }
 
+/**LDY immediate tests ***************************************************************************************************************/
+void test_LDY_immediate_loads_y_register(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA0;
+    mem[0x8001] = 0x42;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL_HEX8(0x42, cpu.Y);
+}
+
+void test_LDY_immediate_sets_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA0;
+    mem[0x8001] = 0x00;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(1, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_LDY_immediate_sets_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA0;
+    mem[0x8001] = 0x80;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(1, cpu.N);
+}
+
+void test_LDY_immediate_clears_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA0;
+    mem[0x8001] = 0x00;
+    mem[0x8002] = 0xA0;
+    mem[0x8003] = 0x01;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_LDY_immediate_clears_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA0;
+    mem[0x8001] = 0x80;
+    mem[0x8002] = 0xA0;
+    mem[0x8003] = 0x01;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_LDY_immediate_returns_two_cycles(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA0;
+    mem[0x8001] = 0x42;
+
+    cpu_reset(&cpu, mem);
+    int cycle = cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(2, cycle);
+}
+
 
 int main(void) {
 
@@ -1877,5 +1980,14 @@ int main(void) {
     RUN_TEST(test_LDX_absolute_y_clears_negative_flag);
     RUN_TEST(test_LDX_absolute_y_returns_four_cycles);
     RUN_TEST(test_LDX_absolute_y_returns_five_cycles_on_page_cross);
+
+    //LDY Tests
+    //Immediate
+    RUN_TEST(test_LDY_immediate_loads_y_register);
+    RUN_TEST(test_LDY_immediate_sets_zero_flag);
+    RUN_TEST(test_LDY_immediate_sets_negative_flag);
+    RUN_TEST(test_LDY_immediate_clears_zero_flag);
+    RUN_TEST(test_LDY_immediate_clears_negative_flag);
+    RUN_TEST(test_LDY_immediate_returns_two_cycles);
     return UNITY_END();
 }

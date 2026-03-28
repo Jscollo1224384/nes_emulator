@@ -198,6 +198,16 @@ int op_ldx_absolute_y(CPU *cpu, uint8_t *mem)
     int page_crossed = (address & 0xFF00) != (effective_address & 0xFF00);
     return page_crossed ? 5 : 4;
 }
+
+// LDY immediate (0xA0) - Load Y register with immediate value
+int op_ldy_immediate(CPU *cpu, uint8_t *mem)
+{
+    uint8_t operand = mem[cpu->PC++];
+    cpu->Y = operand;
+    cpu->Z = (cpu->Y == 0);
+    cpu->N = (cpu->Y & 0x80) ? 1 : 0;
+    return 2;
+}
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -229,5 +239,6 @@ const OpcodeEntry opcode_table[256] = {
     [0xA6] = { op_ldx_zero_page,   "LDX zero page"   },
     [0xB6] = { op_ldx_zero_page_y, "LDX zero page Y" },
     [0xAE] = { op_ldx_absolute,    "LDX absolute"    },
-    [0xBE] = { op_ldx_absolute_y,  "LDX absolute Y"  }
+    [0xBE] = { op_ldx_absolute_y,  "LDX absolute Y"  },
+    [0xA0] = { op_ldy_immediate,   "LDY immediate"   }
 };
