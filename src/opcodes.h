@@ -35,6 +35,10 @@ int op_ldx_zero_page_y(CPU *cpu, uint8_t *mem);
 int op_ldx_absolute(CPU *cpu, uint8_t *mem);
 int op_ldx_absolute_y(CPU *cpu, uint8_t *mem);
 int op_ldy_immediate(CPU *cpu, uint8_t *mem);
+int op_ldy_zero_page(CPU *cpu, uint8_t *mem);
+int op_ldy_zero_page_x(CPU *cpu, uint8_t *mem);
+int op_ldy_absolute(CPU *cpu, uint8_t *mem);
+int op_ldy_absolute_x(CPU *cpu, uint8_t *mem);
 
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem);

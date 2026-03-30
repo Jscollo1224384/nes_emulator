@@ -208,6 +208,52 @@ int op_ldy_immediate(CPU *cpu, uint8_t *mem)
     cpu->N = (cpu->Y & 0x80) ? 1 : 0;
     return 2;
 }
+
+// LDY zero page (0xA4) - Load Y register from zero page memory
+int op_ldy_zero_page(CPU *cpu, uint8_t *mem)
+{
+    uint8_t address = mem[cpu->PC++];
+    cpu->Y = mem[address];
+    cpu->Z = (cpu->Y == 0);
+    cpu->N = (cpu->Y & 0x80) ? 1 : 0;
+    return 3;
+}
+
+// LDY zero page X (0xB4) - Adds X register to base address
+int op_ldy_zero_page_x(CPU *cpu, uint8_t *mem)
+{
+    uint8_t address = mem[cpu->PC++];
+    cpu->Y = mem[(uint8_t)(address + cpu->X)]; //cast as uint8_t to maintain 8 bits and keep zero page.
+    cpu->Z = (cpu->Y == 0);
+    cpu->N = (cpu->Y & 0x80) ? 1 : 0;
+    return 4;
+}
+
+// LDY absolute (0xAC) - Load Y register from a full 16-bit memory address
+int op_ldy_absolute(CPU *cpu, uint8_t *mem)
+{
+    uint8_t lo = mem[cpu->PC++];
+    uint8_t hi = mem[cpu->PC++];
+    uint16_t address = (uint16_t)(hi << 8) | lo;
+    cpu->Y = mem[address];
+    cpu->Z = (cpu->Y == 0);
+    cpu->N = (cpu->Y & 0x80) ? 1 : 0;
+    return 4;
+}
+
+// LDY absolute X (0xBC) - Adds X register to a full 16-bit memory address in Y
+int op_ldy_absolute_x(CPU *cpu, uint8_t *mem)
+{
+    uint8_t lo = mem[cpu->PC++];
+    uint8_t hi = mem[cpu->PC++];
+    uint16_t address = (uint16_t)(hi << 8) | lo;
+    uint16_t effective_address = (uint16_t)(address + cpu->X);
+    cpu->Y = mem[effective_address];
+    cpu->Z = (cpu->Y == 0);
+    cpu->N = (cpu->Y & 0x80) ? 1 : 0;
+    int page_crossed = (address & 0xFF00) != (effective_address & 0xFF00);
+    return page_crossed ? 5 : 4;
+}
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -215,8 +261,6 @@ int op_unimplemented(CPU *cpu, uint8_t *mem)
     (void)mem;  // Suppress unused parameter warnings
     return 1;
 }
-
-
 
 
 // 256-entry lookup table indexed by opcode
@@ -240,5 +284,9 @@ const OpcodeEntry opcode_table[256] = {
     [0xB6] = { op_ldx_zero_page_y, "LDX zero page Y" },
     [0xAE] = { op_ldx_absolute,    "LDX absolute"    },
     [0xBE] = { op_ldx_absolute_y,  "LDX absolute Y"  },
-    [0xA0] = { op_ldy_immediate,   "LDY immediate"   }
+    [0xA0] = { op_ldy_immediate,   "LDY immediate"   },
+    [0xA4] = { op_ldy_zero_page,   "LDY zero page"   },
+    [0xB4] = { op_ldy_zero_page_x, "LDY zero page X" },
+    [0xAC] = { op_ldy_absolute,    "LDY absolute"    },
+    [0xBC] = { op_ldy_absolute_x,  "LDY absolute X"  }
 };
