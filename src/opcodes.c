@@ -254,6 +254,15 @@ int op_ldy_absolute_x(CPU *cpu, uint8_t *mem)
     int page_crossed = (address & 0xFF00) != (effective_address & 0xFF00);
     return page_crossed ? 5 : 4;
 }
+
+// STX zero page (0x86) - Store X register to zero page memory
+int op_stx_zero_page(CPU *cpu, uint8_t *mem)
+{
+    uint8_t address = mem[cpu->PC++];
+    mem[address] = cpu->X;
+    return 3;
+}
+
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -288,5 +297,6 @@ const OpcodeEntry opcode_table[256] = {
     [0xA4] = { op_ldy_zero_page,   "LDY zero page"   },
     [0xB4] = { op_ldy_zero_page_x, "LDY zero page X" },
     [0xAC] = { op_ldy_absolute,    "LDY absolute"    },
-    [0xBC] = { op_ldy_absolute_x,  "LDY absolute X"  }
+    [0xBC] = { op_ldy_absolute_x,  "LDY absolute X"  },
+    [0x86] = {op_stx_zero_page,    "STX zero page"   }
 };
