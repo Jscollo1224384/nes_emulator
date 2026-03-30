@@ -254,6 +254,33 @@ int op_ldy_absolute_x(CPU *cpu, uint8_t *mem)
     int page_crossed = (address & 0xFF00) != (effective_address & 0xFF00);
     return page_crossed ? 5 : 4;
 }
+
+// STX zero page (0x86) - Store X register to zero page memory
+int op_stx_zero_page(CPU *cpu, uint8_t *mem)
+{
+    uint8_t address = mem[cpu->PC++];
+    mem[address] = cpu->X;
+    return 3;
+}
+
+// STX zero page Y (0x96) - Y register stores X
+int op_stx_zero_page_y(CPU *cpu, uint8_t *mem)
+{
+    uint8_t address = mem[cpu->PC++];
+    mem[(uint8_t)(address + cpu->Y)] = cpu->X; //cast as uint8_t to maintain 8 bits and keep zero page.
+    return 4;
+}
+
+// STX absolute (0x8E) - Store X register to a full 16-bit memory address
+int op_stx_absolute(CPU *cpu, uint8_t *mem)
+{
+    uint8_t lo = mem[cpu->PC++];
+    uint8_t hi = mem[cpu->PC++];
+    uint16_t address = (uint16_t)(hi << 8) | lo;
+    mem[address] = cpu->X;
+    return 4;
+}
+
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -288,5 +315,8 @@ const OpcodeEntry opcode_table[256] = {
     [0xA4] = { op_ldy_zero_page,   "LDY zero page"   },
     [0xB4] = { op_ldy_zero_page_x, "LDY zero page X" },
     [0xAC] = { op_ldy_absolute,    "LDY absolute"    },
-    [0xBC] = { op_ldy_absolute_x,  "LDY absolute X"  }
+    [0xBC] = { op_ldy_absolute_x,  "LDY absolute X"  },
+    [0x86] = { op_stx_zero_page,   "STX zero page"   },
+    [0x96] = { op_stx_zero_page_y, "STX zero page Y" },
+    [0x8E] = { op_stx_absolute,    "STX absolute"    }
 };
