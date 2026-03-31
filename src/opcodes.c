@@ -296,6 +296,16 @@ int op_sty_zero_page_x(CPU *cpu, uint8_t *mem)
     mem[(uint8_t)(address + cpu->X)] = cpu->Y; //cast as uint8_t to maintain 8 bits and keep zero page.
     return 4;
 }
+
+// STY absolute (0x8C) - Store Y register to a full 16-bit memory address
+int op_sty_absolute(CPU *cpu, uint8_t *mem)
+{
+    uint8_t lo = mem[cpu->PC++];
+    uint8_t hi = mem[cpu->PC++];
+    uint16_t address = (uint16_t)(hi << 8) | lo;
+    mem[address] = cpu->Y;
+    return 4;
+}
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -336,4 +346,5 @@ const OpcodeEntry opcode_table[256] = {
     [0x8E] = { op_stx_absolute,    "STX absolute"    },
     [0x84] = { op_sty_zero_page,   "STY zero page"   },
     [0x94] = { op_sty_zero_page_x, "STY zero page X" },
+    [0x8C] = { op_sty_absolute,    "STY absolute"    }
 };
