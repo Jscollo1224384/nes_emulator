@@ -2628,7 +2628,7 @@ void test_STY_zeropage_x_wraps_around_zero_page(void)
     TEST_ASSERT_EQUAL(0x42, mem[0x0004]);
 }
 
-/** STY absolut tests *********************************************************************************/
+/** STY absolut tests **********************************************************************************/
 void test_STY_absolute_stores_y_register(void)
 {
     CPU cpu;
@@ -2667,6 +2667,143 @@ void test_STY_absolute_returns_four_cycles(void)
     int cycle = cpu_step(&cpu, mem);
 
     TEST_ASSERT_EQUAL(4, cycle);
+}
+
+/** TAX Tests *****************************************************************************************************************/
+void test_TAX_transfers_accumulator_to_x(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0x42;
+    mem[0x8002] = 0xAA;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0x42, cpu.X);
+}
+
+void test_TAX_sets_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0x00;
+    mem[0x8002] = 0xAA;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu.Z = 0;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(1, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_TAX_sets_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0x80;
+    mem[0x8002] = 0xAA;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu.N = 0;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(1, cpu.N);
+}
+void test_TAX_clears_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0x01;
+    mem[0x8002] = 0xAA;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu.Z = 1;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_TAX_clears_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0x01;
+    mem[0x8002] = 0xAA;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu.N = 1;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_TAX_overwrites_existing_x(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA2;
+    mem[0x8001] = 0x42;
+    mem[0x8002] = 0xA9;
+    mem[0x8003] = 0x01;
+    mem[0x8004] = 0xAA;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0x01, cpu.X);
+}
+
+void test_TAX_returns_two_cycles(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0x42;
+    mem[0x8002] = 0xAA;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    int cycle = cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(2, cycle);
 }
 int main(void) {
 
@@ -2846,5 +2983,15 @@ int main(void) {
     //Absolute
     RUN_TEST(test_STY_absolute_stores_y_register);
     RUN_TEST(test_STY_absolute_returns_four_cycles);
+
+    //TAX Tests
+    //Implied
+    RUN_TEST(test_TAX_transfers_accumulator_to_x);
+    RUN_TEST(test_TAX_sets_zero_flag);
+    RUN_TEST(test_TAX_sets_negative_flag);
+    RUN_TEST(test_TAX_clears_zero_flag);
+    RUN_TEST(test_TAX_clears_negative_flag);
+    RUN_TEST(test_TAX_overwrites_existing_x);
+    RUN_TEST(test_TAX_returns_two_cycles);
     return UNITY_END();
 }
