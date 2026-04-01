@@ -2805,6 +2805,146 @@ void test_TAX_returns_two_cycles(void)
 
     TEST_ASSERT_EQUAL(2, cycle);
 }
+
+/** TAY Tests **********************************************************************************/
+void test_TAY_transfers_accumulator_to_y(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0x42;
+    mem[0x8002] = 0xA8;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0x42, cpu.Y);
+}
+
+void test_TAY_sets_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0x00;
+    mem[0x8002] = 0xA8;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu.Z = 0;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(1, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_TAY_sets_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0x80;
+    mem[0x8002] = 0xA8;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu.N = 0;
+
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(1, cpu.N);
+}
+
+void test_TAY_clears_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0x01;
+    mem[0x8002] = 0xA8;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu.Z = 1;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_TAY_clears_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0x01;
+    mem[0x8002] = 0xA8;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu.N = 1;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_TAY_returns_two_cycles(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0x42;
+    mem[0x8002] = 0xA8;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    int cycle = cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(2, cycle);
+}
+
+void test_TAY_overwrites_existing_y(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA0;
+    mem[0x8001] = 0x42;
+    mem[0x8002] = 0xA9;
+    mem[0x8003] = 0x01;
+    mem[0x8004] = 0xA8;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0x01, cpu.Y);
+}
+
 int main(void) {
 
     UNITY_BEGIN();
@@ -2993,5 +3133,15 @@ int main(void) {
     RUN_TEST(test_TAX_clears_negative_flag);
     RUN_TEST(test_TAX_overwrites_existing_x);
     RUN_TEST(test_TAX_returns_two_cycles);
+
+    //TAY Tests
+    //Implied
+    RUN_TEST(test_TAY_transfers_accumulator_to_y);
+    RUN_TEST(test_TAY_sets_zero_flag);
+    RUN_TEST(test_TAY_sets_negative_flag);
+    RUN_TEST(test_TAY_clears_zero_flag);
+    RUN_TEST(test_TAY_clears_negative_flag);
+    RUN_TEST(test_TAY_returns_two_cycles);
+    RUN_TEST(test_TAY_overwrites_existing_y);
     return UNITY_END();
 }
