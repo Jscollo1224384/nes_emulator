@@ -357,6 +357,13 @@ int op_tsx_implied(CPU *cpu, uint8_t *mem)
     return 2;
 }
 
+// TXS implied (0x9A) - Transfer X to Stack Pointer
+int op_txs_implied(CPU *cpu, uint8_t *mem)
+{
+    (void)mem;
+    cpu->SP = cpu->X;
+    return 2;
+}
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -401,5 +408,6 @@ const OpcodeEntry opcode_table[256] = {
     [0xA8] = { op_tay_implied,     "TAY implied"     },
     [0x8A] = { op_txa_implied,     "TXA implied"     },
     [0x98] = { op_tya_implied,     "TYA implied"     },
-    [0xBA] = { op_tsx_implied,     "TSX implied"     }
+    [0xBA] = { op_tsx_implied,     "TSX implied"     },
+    [0x9A] = { op_txs_implied,     "TXS implied"     }
 };

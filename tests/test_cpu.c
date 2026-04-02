@@ -3321,6 +3321,42 @@ void test_TSX_returns_two_cycles(void)
     TEST_ASSERT_EQUAL(2, cycle);
 }
 
+/** TXS Tests *******************************************************************************************************/
+void test_TXS_transfers_x_to_stack_pointer(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA2;
+    mem[0x8001] = 0x42;
+    mem[0x8002] = 0x9A;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0x42, cpu.SP);
+}
+
+void test_TXS_returns_two_cycles(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA2;
+    mem[0x8001] = 0x42;
+    mem[0x8002] = 0x9A;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    int cycle = cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(2, cycle);
+}
 int main(void) {
 
     UNITY_BEGIN();
@@ -3548,5 +3584,9 @@ int main(void) {
     RUN_TEST(test_TSX_clears_zero_flag);
     RUN_TEST(test_TSX_clears_negative_flag);
     RUN_TEST(test_TSX_returns_two_cycles);
+
+    //TXS Tests
+    RUN_TEST(test_TXS_transfers_x_to_stack_pointer);
+    RUN_TEST(test_TXS_returns_two_cycles);
     return UNITY_END();
 }
