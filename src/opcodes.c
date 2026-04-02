@@ -310,6 +310,7 @@ int op_sty_absolute(CPU *cpu, uint8_t *mem)
 // TAX implied (0xAA) - Transfer accumulator to X
 int op_tax_implied(CPU *cpu, uint8_t *mem)
 {
+    (void)mem;
     cpu->X = cpu->A;
     cpu->Z = (cpu->X == 0);
     cpu->N = (cpu->X & 0x80) ? 1 : 0;
@@ -319,11 +320,23 @@ int op_tax_implied(CPU *cpu, uint8_t *mem)
 // TAY implied (0xA8) - Transfer accumulator to Y
 int op_tay_implied(CPU *cpu, uint8_t *mem)
 {
+    (void)mem;
     cpu->Y = cpu->A;
     cpu->Z = (cpu->Y == 0);
     cpu->N = (cpu->Y & 0x80) ? 1 : 0;
     return 2;
 }
+
+// TXA implied (0x8A) - Transfer X to accumulator
+int op_txa_implied(CPU *cpu, uint8_t *mem)
+{
+    (void)mem;
+    cpu->A = cpu->X;
+    cpu->Z = (cpu->A == 0);
+    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    return 2;
+}
+
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -366,5 +379,6 @@ const OpcodeEntry opcode_table[256] = {
     [0x94] = { op_sty_zero_page_x, "STY zero page X" },
     [0x8C] = { op_sty_absolute,    "STY absolute"    },
     [0xAA] = { op_tax_implied,     "TAX implied"     },
-    [0xA8] = { op_tay_implied,     "TAY implied"     }
+    [0xA8] = { op_tay_implied,     "TAY implied"     },
+    [0x8A] = { op_txa_implied,     "TXA implied"     }
 };

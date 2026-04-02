@@ -47,6 +47,8 @@ int op_sty_zero_page_x(CPU *cpu, uint8_t *mem);
 int op_sty_absolute(CPU *cpu, uint8_t *mem);
 int op_tax_implied(CPU *cpu, uint8_t *mem);
 int op_tay_implied(CPU *cpu, uint8_t *mem);
+int op_txa_implied(CPU *cpu, uint8_t *mem);
+
 
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem);
