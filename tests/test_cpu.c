@@ -3082,6 +3082,144 @@ void test_TXA_overwrites_existing_accumulator(void)
 
     TEST_ASSERT_EQUAL(0x01, cpu.A);
 }
+
+/** TYA Tests************************************************************************************************/
+void test_TYA_transfers_y_to_accumulator(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA0;
+    mem[0x8001] = 0x42;
+    mem[0x8002] = 0x98;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0x42, cpu.A);
+}
+
+void test_TYA_sets_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA0;
+    mem[0x8001] = 0x00;
+    mem[0x8002] = 0x98;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu.Z = 0;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(1, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_TYA_sets_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA0;
+    mem[0x8001] = 0x80;
+    mem[0x8002] = 0x98;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu.N = 0;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(1, cpu.N);
+}
+
+void test_TYA_clears_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA0;
+    mem[0x8001] = 0x01;
+    mem[0x8002] = 0x98;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu.Z = 1;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_TYA_clears_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA0;
+    mem[0x8001] = 0x01;
+    mem[0x8002] = 0x98;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu.N = 1;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_TYA_returns_two_cycles(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA0;
+    mem[0x8001] = 0x42;
+    mem[0x8002] = 0x98;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    int cycle = cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(2, cycle);
+}
+
+void test_TYA_overwrites_existing_accumulator(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0x42;
+    mem[0x8002] = 0xA0;
+    mem[0x8003] = 0x01;
+    mem[0x8004] = 0x98;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0x01, cpu.A);
+}
 int main(void) {
 
     UNITY_BEGIN();
@@ -3290,5 +3428,15 @@ int main(void) {
     RUN_TEST(test_TXA_clears_negative_flag);
     RUN_TEST(test_TXA_returns_two_cycles);
     RUN_TEST(test_TXA_overwrites_existing_accumulator);
+
+    //TYA Tests
+    //Implied
+    RUN_TEST(test_TYA_transfers_y_to_accumulator);
+    RUN_TEST(test_TYA_sets_zero_flag);
+    RUN_TEST(test_TYA_sets_negative_flag);
+    RUN_TEST(test_TYA_clears_zero_flag);
+    RUN_TEST(test_TYA_clears_negative_flag);
+    RUN_TEST(test_TYA_returns_two_cycles);
+    RUN_TEST(test_TYA_overwrites_existing_accumulator);
     return UNITY_END();
 }

@@ -337,6 +337,16 @@ int op_txa_implied(CPU *cpu, uint8_t *mem)
     return 2;
 }
 
+// TYA implied (0x98) - Transfer Y to accumulator
+int op_tya_implied(CPU *cpu, uint8_t *mem)
+{
+    (void)mem;
+    cpu->A = cpu->Y;
+    cpu->Z = (cpu->A == 0);
+    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    return 2;
+}
+
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -344,7 +354,6 @@ int op_unimplemented(CPU *cpu, uint8_t *mem)
     (void)mem;  // Suppress unused parameter warnings
     return 1;
 }
-
 
 // 256-entry lookup table indexed by opcode
 // Using designated initializers - all unmentioned entries default to 0 (null handler)
@@ -380,5 +389,6 @@ const OpcodeEntry opcode_table[256] = {
     [0x8C] = { op_sty_absolute,    "STY absolute"    },
     [0xAA] = { op_tax_implied,     "TAX implied"     },
     [0xA8] = { op_tay_implied,     "TAY implied"     },
-    [0x8A] = { op_txa_implied,     "TXA implied"     }
+    [0x8A] = { op_txa_implied,     "TXA implied"     },
+    [0x98] = { op_tya_implied,     "TYA implied"     }
 };
