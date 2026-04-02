@@ -3220,6 +3220,107 @@ void test_TYA_overwrites_existing_accumulator(void)
 
     TEST_ASSERT_EQUAL(0x01, cpu.A);
 }
+
+/** TSX Tests ***************************************************************************************************/
+void test_TSX_transfers_stack_pointer_to_x(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xBA;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0xFD, cpu.X);
+}
+
+void test_TSX_sets_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xBA;
+
+    cpu_reset(&cpu, mem);
+    cpu.SP = 0x00;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(1, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_TSX_sets_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xBA;
+
+    cpu_reset(&cpu, mem); //Reset sets SP to 0xFD, this will set the negative flag.
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(1, cpu.N);
+}
+
+void test_TSX_clears_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xBA;
+
+    cpu_reset(&cpu, mem);
+    cpu.SP = 0x01;
+    cpu.Z = 1;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_TSX_clears_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xBA;
+
+    cpu_reset(&cpu, mem);
+    cpu.SP = 0x01;
+    cpu.N = 1;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_TSX_returns_two_cycles(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xBA;
+
+    cpu_reset(&cpu, mem);
+    int cycle = cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(2, cycle);
+}
+
 int main(void) {
 
     UNITY_BEGIN();
@@ -3438,5 +3539,14 @@ int main(void) {
     RUN_TEST(test_TYA_clears_negative_flag);
     RUN_TEST(test_TYA_returns_two_cycles);
     RUN_TEST(test_TYA_overwrites_existing_accumulator);
+
+    //TSX Tests
+    //Implied
+    RUN_TEST(test_TSX_transfers_stack_pointer_to_x);
+    RUN_TEST(test_TSX_sets_zero_flag);
+    RUN_TEST(test_TSX_sets_negative_flag);
+    RUN_TEST(test_TSX_clears_zero_flag);
+    RUN_TEST(test_TSX_clears_negative_flag);
+    RUN_TEST(test_TSX_returns_two_cycles);
     return UNITY_END();
 }
