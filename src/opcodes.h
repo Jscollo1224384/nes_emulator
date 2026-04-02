@@ -49,6 +49,8 @@ int op_tax_implied(CPU *cpu, uint8_t *mem);
 int op_tay_implied(CPU *cpu, uint8_t *mem);
 int op_txa_implied(CPU *cpu, uint8_t *mem);
 int op_tya_implied(CPU *cpu, uint8_t *mem);
+int op_tsx_implied(CPU *cpu, uint8_t *mem);
+
 
 
 
