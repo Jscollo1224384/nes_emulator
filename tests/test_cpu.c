@@ -3357,6 +3357,61 @@ void test_TXS_returns_two_cycles(void)
 
     TEST_ASSERT_EQUAL(2, cycle);
 }
+
+/** PHA Tests *****************************************************************************************/
+void test_PHA_pushes_accumulator_to_stack(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0x42;
+    mem[0x8002] = 0x48;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0x42, mem[0x01FD]);
+}
+
+void test_PHA_decrements_stack_pointer(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0x42;
+    mem[0x8002] = 0x48;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0xFC, cpu.SP);
+}
+
+void test_PHA_returns_three_cycles(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0x42;
+    mem[0x8002] = 0x48;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    int cycle = cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(3, cycle);
+}
 int main(void) {
 
     UNITY_BEGIN();
@@ -3588,5 +3643,10 @@ int main(void) {
     //TXS Tests
     RUN_TEST(test_TXS_transfers_x_to_stack_pointer);
     RUN_TEST(test_TXS_returns_two_cycles);
+
+    //PHA Tests
+    RUN_TEST(test_PHA_pushes_accumulator_to_stack);
+    RUN_TEST(test_PHA_decrements_stack_pointer);
+    RUN_TEST(test_PHA_returns_three_cycles);
     return UNITY_END();
 }
