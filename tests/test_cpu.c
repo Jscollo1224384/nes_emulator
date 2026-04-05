@@ -3412,6 +3412,132 @@ void test_PHA_returns_three_cycles(void)
 
     TEST_ASSERT_EQUAL(3, cycle);
 }
+
+/** PLA Tests *****************************************************************************************************/
+void test_PLA_pulls_accumulator_from_stack(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0x68;
+    mem[0x01FD] = 0x42;
+
+    cpu_reset(&cpu, mem);
+    cpu.SP = 0xFC;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0x42, cpu.A);
+}
+
+void test_PLA_increments_stack_pointer(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0x68;
+    mem[0x01FD] = 0x42;
+
+    cpu_reset(&cpu, mem);
+    cpu.SP = 0xFC;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0xFD, cpu.SP);
+}
+
+void test_PLA_sets_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0x68;
+    mem[0x01FD] = 0x00;
+
+    cpu_reset(&cpu, mem);
+    cpu.SP = 0xFC;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(1, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_PLA_sets_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0x68;
+    mem[0x01FD] = 0x80;
+
+    cpu_reset(&cpu, mem);
+    cpu.SP = 0xFC;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(1, cpu.N);
+}
+
+void test_PLA_clears_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0x68;
+    mem[0x01FD] = 0x01;
+
+    cpu_reset(&cpu, mem);
+    cpu.SP = 0xFC;
+    cpu.Z = 1;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_PLA_clears_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0x68;
+    mem[0x01FD] = 0x01;
+
+    cpu_reset(&cpu, mem);
+    cpu.SP = 0xFC;
+    cpu.N = 1;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_PLA_returns_four_cycles(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0x68;
+    mem[0x01FD] = 0x42;
+
+    cpu_reset(&cpu, mem);
+    cpu.SP = 0xFC;
+    int cycle = cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(4, cycle);
+}
 int main(void) {
 
     UNITY_BEGIN();
@@ -3641,12 +3767,25 @@ int main(void) {
     RUN_TEST(test_TSX_returns_two_cycles);
 
     //TXS Tests
+    //Implied
     RUN_TEST(test_TXS_transfers_x_to_stack_pointer);
     RUN_TEST(test_TXS_returns_two_cycles);
 
     //PHA Tests
+    //Implied
     RUN_TEST(test_PHA_pushes_accumulator_to_stack);
     RUN_TEST(test_PHA_decrements_stack_pointer);
     RUN_TEST(test_PHA_returns_three_cycles);
+
+    //PLA Tests
+    //Implied
+    RUN_TEST(test_PLA_pulls_accumulator_from_stack);
+    RUN_TEST(test_PLA_increments_stack_pointer);
+    RUN_TEST(test_PLA_sets_zero_flag);
+    RUN_TEST(test_PLA_sets_negative_flag);
+    RUN_TEST(test_PLA_clears_zero_flag);
+    RUN_TEST(test_PLA_clears_negative_flag);
+    RUN_TEST(test_PLA_returns_four_cycles);
+
     return UNITY_END();
 }

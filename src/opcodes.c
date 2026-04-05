@@ -372,6 +372,16 @@ int op_pha_implied(CPU *cpu, uint8_t *mem)
     cpu->SP --;
     return 3;
 }
+
+// PLA implied (0x68) - Pull value from the stack and store it into the accumulator
+int op_pla_implied(CPU *cpu, uint8_t *mem)
+{
+    cpu->SP ++;
+    cpu->A = mem[0x0100 + cpu->SP];
+    cpu->Z = (cpu->A == 0);
+    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    return 4;
+}
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -418,5 +428,6 @@ const OpcodeEntry opcode_table[256] = {
     [0x98] = { op_tya_implied,     "TYA implied"     },
     [0xBA] = { op_tsx_implied,     "TSX implied"     },
     [0x9A] = { op_txs_implied,     "TXS implied"     },
-    [0x48] = { op_pha_implied,     "PHA implied"     }
+    [0x48] = { op_pha_implied,     "PHA implied"     },
+    [0x68] = { op_pla_implied,     "PLA implied"     }
 };
