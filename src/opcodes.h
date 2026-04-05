@@ -51,6 +51,7 @@ int op_txa_implied(CPU *cpu, uint8_t *mem);
 int op_tya_implied(CPU *cpu, uint8_t *mem);
 int op_tsx_implied(CPU *cpu, uint8_t *mem);
 int op_txs_implied(CPU *cpu, uint8_t *mem);
+int op_pha_implied(CPU *cpu, uint8_t *mem);
 
 
 

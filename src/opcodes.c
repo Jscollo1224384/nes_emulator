@@ -364,6 +364,14 @@ int op_txs_implied(CPU *cpu, uint8_t *mem)
     cpu->SP = cpu->X;
     return 2;
 }
+
+// PHA implied (0x48) - Push value in accumulator onto the stack
+int op_pha_implied(CPU *cpu, uint8_t *mem)
+{
+    mem[0x0100 + cpu->SP] = cpu->A;
+    cpu->SP --;
+    return 3;
+}
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -409,5 +417,6 @@ const OpcodeEntry opcode_table[256] = {
     [0x8A] = { op_txa_implied,     "TXA implied"     },
     [0x98] = { op_tya_implied,     "TYA implied"     },
     [0xBA] = { op_tsx_implied,     "TSX implied"     },
-    [0x9A] = { op_txs_implied,     "TXS implied"     }
+    [0x9A] = { op_txs_implied,     "TXS implied"     },
+    [0x48] = { op_pha_implied,     "PHA implied"     }
 };
