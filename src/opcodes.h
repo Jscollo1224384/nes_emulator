@@ -56,6 +56,8 @@ int op_unimplemented(CPU *cpu, uint8_t *mem);
 int op_php_implied(CPU *cpu, uint8_t *mem);
 int op_plp_implied(CPU *cpu, uint8_t *mem);
 int op_inx_implied(CPU *cpu, uint8_t *mem);
+int op_iny_implied(CPU *cpu, uint8_t *mem);
+
 
 
 
