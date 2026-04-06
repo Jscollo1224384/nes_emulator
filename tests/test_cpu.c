@@ -3584,6 +3584,62 @@ void test_PHP_returns_three_cycles(void)
 
     TEST_ASSERT_EQUAL(3, cycle);
 }
+
+/** PLP Tests ****************************************************************************************************/
+void test_PLP_pulls_processor_status_from_stack(void) {
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0x08;
+    mem[0x8001] = 0x28;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu.N = 1;
+    cpu_step(&cpu, mem);
+
+    // cpu.I and cpu.B are set from pulling processor status after reset.
+    TEST_ASSERT_EQUAL(1, cpu.I);
+    TEST_ASSERT_EQUAL(1, cpu.B);
+    TEST_ASSERT_EQUAL(0,cpu.N);
+}
+
+void test_PLP_increments_stack_pointer(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0x08;
+    mem[0x8001] = 0x28;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu.SP = 0xFC;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0XFD, cpu.SP);
+}
+
+void test_PLP_returns_four_cycles(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0x08;
+    mem[0x8001] = 0x28;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    int cycle = cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(4, cycle);
+}
 int main(void) {
 
     UNITY_BEGIN();
@@ -3839,5 +3895,10 @@ int main(void) {
     RUN_TEST(test_PHP_decrements_stack_pointer);
     RUN_TEST(test_PHP_returns_three_cycles);
 
+    //PLP Tests
+    //Implied
+    RUN_TEST(test_PLP_pulls_processor_status_from_stack);
+    RUN_TEST(test_PLP_increments_stack_pointer);
+    RUN_TEST(test_PLP_returns_four_cycles);
     return UNITY_END();
 }

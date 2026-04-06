@@ -383,7 +383,7 @@ int op_pla_implied(CPU *cpu, uint8_t *mem)
     return 4;
 }
 
-// PHP implied (0x08) - Push value from the stack and store it into the accumulator
+// PHP implied (0x08) - Push processor status register onto the stack
 int op_php_implied(CPU *cpu, uint8_t *mem)
 {
     uint8_t status = (cpu->N << 7) |
@@ -398,6 +398,24 @@ int op_php_implied(CPU *cpu, uint8_t *mem)
     cpu->SP--;
 
     return 3;
+}
+
+// PLP implied (0x28) - Pull processor status from the stack and unpack its status flags.
+int op_plp_implied(CPU *cpu, uint8_t *mem)
+{
+    cpu->SP++;
+    uint8_t status = mem[0x0100 + cpu->SP];
+
+    cpu->N = (status >> 7) & 1;
+    cpu->V = (status >> 6) & 1;
+    // bit 5 unused, ignore
+    cpu->B = (status >> 4) & 1;
+    cpu->D = (status >> 3) & 1;
+    cpu->I = (status >> 2) & 1;
+    cpu->Z = (status >> 1) & 1;
+    cpu->C = (status >> 0) & 1;
+
+    return 4;
 }
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
@@ -447,5 +465,6 @@ const OpcodeEntry opcode_table[256] = {
     [0x9A] = { op_txs_implied,     "TXS implied"     },
     [0x48] = { op_pha_implied,     "PHA implied"     },
     [0x68] = { op_pla_implied,     "PLA implied"     },
-    [0x08] = { op_php_implied,     "PHP implied"     }
+    [0x08] = { op_php_implied,     "PHP implied"     },
+    [0x28] = { op_plp_implied,     "PLP implied"     }
 };
