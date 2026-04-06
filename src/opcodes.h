@@ -58,6 +58,7 @@ int op_plp_implied(CPU *cpu, uint8_t *mem);
 int op_inx_implied(CPU *cpu, uint8_t *mem);
 int op_iny_implied(CPU *cpu, uint8_t *mem);
 int op_dex_implied(CPU *cpu, uint8_t *mem);
+int op_dey_implied(CPU *cpu, uint8_t *mem);
 
 
 

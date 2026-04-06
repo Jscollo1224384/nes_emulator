@@ -447,6 +447,16 @@ int op_dex_implied(CPU *cpu, uint8_t *mem)
     cpu->N = (cpu->X & 0x80) ? 1 : 0;
     return 2;
 }
+
+// DEY implied (0x88) -  Decrements the Y register by 1.
+int op_dey_implied(CPU *cpu, uint8_t *mem)
+{
+    (void)mem;
+    cpu->Y--;
+    cpu->Z = (cpu->Y == 0);
+    cpu->N = (cpu->Y & 0x80) ? 1 : 0;
+    return 2;
+}
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -499,5 +509,6 @@ const OpcodeEntry opcode_table[256] = {
     [0x28] = { op_plp_implied,     "PLP implied"     },
     [0xE8] = { op_inx_implied,     "INX implied"     },
     [0xC8] = { op_iny_implied,     "INY implied"     },
-    [0xCA] = { op_dex_implied,     "DEX implied"     }
+    [0xCA] = { op_dex_implied,     "DEX implied"     },
+    [0x88] = { op_dey_implied,     "DEY implied"     }
 };
