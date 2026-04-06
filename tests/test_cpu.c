@@ -3640,6 +3640,125 @@ void test_PLP_returns_four_cycles(void)
 
     TEST_ASSERT_EQUAL(4, cycle);
 }
+
+/** INX Tests *****************************************************************************************************/
+void test_INX_increments_x_register(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xE8;
+
+    cpu_reset(&cpu, mem);
+    cpu.X = 0xFC;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0XFD, cpu.X);
+}
+
+void test_INX_sets_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xE8;
+
+    cpu_reset(&cpu, mem);
+    cpu.X = 0xFF;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(1, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_INX_sets_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xE8;
+
+    cpu_reset(&cpu, mem);
+    cpu.X = 0xFE;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(1, cpu.N);
+}
+
+void test_INX_clears_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xE8;
+
+    cpu_reset(&cpu, mem);
+    cpu.Z = 1;
+    cpu.X = 0x00;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_INX_clears_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xE8;
+
+    cpu_reset(&cpu, mem);
+    cpu.N = 1;
+    cpu.X = 0x00;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_INX_returns_two_cycles(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xE8;
+
+    cpu_reset(&cpu, mem);
+    int cycle = cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(2, cycle);
+}
+
+void test_INX_wraps_around(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xE8;
+
+    cpu_reset(&cpu, mem);
+    cpu.X = 0xFF;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0x00, cpu.X);
+}
+
 int main(void) {
 
     UNITY_BEGIN();
@@ -3900,5 +4019,15 @@ int main(void) {
     RUN_TEST(test_PLP_pulls_processor_status_from_stack);
     RUN_TEST(test_PLP_increments_stack_pointer);
     RUN_TEST(test_PLP_returns_four_cycles);
+
+    //INX Tests
+    //Implied
+    RUN_TEST(test_INX_increments_x_register);
+    RUN_TEST(test_INX_sets_zero_flag);
+    RUN_TEST(test_INX_sets_negative_flag);
+    RUN_TEST(test_INX_clears_zero_flag);
+    RUN_TEST(test_INX_clears_negative_flag);
+    RUN_TEST(test_INX_returns_two_cycles);
+    RUN_TEST(test_INX_wraps_around);
     return UNITY_END();
 }
