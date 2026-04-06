@@ -382,6 +382,23 @@ int op_pla_implied(CPU *cpu, uint8_t *mem)
     cpu->N = (cpu->A & 0x80) ? 1 : 0;
     return 4;
 }
+
+// PHP implied (0x08) - Push value from the stack and store it into the accumulator
+int op_php_implied(CPU *cpu, uint8_t *mem)
+{
+    uint8_t status = (cpu->N << 7) |
+                     (cpu->V << 6) |
+                     (1 << 5)      |  // unused bit, always 1
+                     (cpu->B << 4) |
+                     (cpu->D << 3) |
+                     (cpu->I << 2) |
+                     (cpu->Z << 1) |
+                     (cpu->C << 0);
+    mem[0x0100 + cpu->SP] = status;
+    cpu->SP--;
+
+    return 3;
+}
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -429,5 +446,6 @@ const OpcodeEntry opcode_table[256] = {
     [0xBA] = { op_tsx_implied,     "TSX implied"     },
     [0x9A] = { op_txs_implied,     "TXS implied"     },
     [0x48] = { op_pha_implied,     "PHA implied"     },
-    [0x68] = { op_pla_implied,     "PLA implied"     }
+    [0x68] = { op_pla_implied,     "PLA implied"     },
+    [0x08] = { op_php_implied,     "PHP implied"     }
 };

@@ -13,7 +13,7 @@ void cpu_reset(CPU *cpu, uint8_t *mem) {
     //Status flags
     cpu->N      = 0;                                    // Negative flag is set when bit 7 (sign bit) is set.
     cpu->V      = 0;                                    // Set when there is signed overflow.
-    cpu->B      = 0;                                    // Break flag — set when BRK instruction is executed, rarely used in game mode, mainly used for debug.
+    cpu->B      = 1;                                    // Break flag — set when BRK instruction is executed, rarely used in game mode, mainly used for debug, and reset.
     cpu->D      = 0;                                    // Decimal (The NES's version of the 6502 did not have a decimal flag. This will not be used.)
     cpu->I      = 1;                                    // Interrupt disable flag set on reset
     cpu->Z      = 0;                                    // Set when the result of an operation is 0

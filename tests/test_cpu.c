@@ -3538,6 +3538,52 @@ void test_PLA_returns_four_cycles(void)
 
     TEST_ASSERT_EQUAL(4, cycle);
 }
+
+/** PHP Tests ************************************************************************************************/
+void test_PHP_pushes_processor_status_to_stack(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0x08;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0b00110100, mem[0x01FD]); // This tests the status bits that are set at reset.
+}
+
+void test_PHP_decrements_stack_pointer(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0x08;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0xFC, cpu.SP);
+}
+
+void test_PHP_returns_three_cycles(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0x08;
+
+    cpu_reset(&cpu, mem);
+    int cycle = cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(3, cycle);
+}
 int main(void) {
 
     UNITY_BEGIN();
@@ -3786,6 +3832,12 @@ int main(void) {
     RUN_TEST(test_PLA_clears_zero_flag);
     RUN_TEST(test_PLA_clears_negative_flag);
     RUN_TEST(test_PLA_returns_four_cycles);
+
+    //PHP Tests
+    //Implied
+    RUN_TEST(test_PHP_pushes_processor_status_to_stack);
+    RUN_TEST(test_PHP_decrements_stack_pointer);
+    RUN_TEST(test_PHP_returns_three_cycles);
 
     return UNITY_END();
 }
