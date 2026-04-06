@@ -417,6 +417,16 @@ int op_plp_implied(CPU *cpu, uint8_t *mem)
 
     return 4;
 }
+
+// INX implied (0xE8) -  Increments the X register by 1.
+int op_inx_implied(CPU *cpu, uint8_t *mem)
+{
+    (void)mem;
+    cpu->X++;
+    cpu->Z = (cpu->X == 0);
+    cpu->N = (cpu->X & 0x80) ? 1 : 0;
+    return 2;
+}
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -466,5 +476,6 @@ const OpcodeEntry opcode_table[256] = {
     [0x48] = { op_pha_implied,     "PHA implied"     },
     [0x68] = { op_pla_implied,     "PLA implied"     },
     [0x08] = { op_php_implied,     "PHP implied"     },
-    [0x28] = { op_plp_implied,     "PLP implied"     }
+    [0x28] = { op_plp_implied,     "PLP implied"     },
+    [0xE8] = { op_inx_implied,     "INX implied"     }
 };
