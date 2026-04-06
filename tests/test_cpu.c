@@ -3876,6 +3876,126 @@ void test_INY_wraps_around(void)
 
     TEST_ASSERT_EQUAL(0x00, cpu.Y);
 }
+
+/** DEX Tests *****************************************************************************************************/
+void test_DEX_decrements_x_register(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xCA;
+
+    cpu_reset(&cpu, mem);
+    cpu.X = 0xFC;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0XFB, cpu.X);
+}
+
+void test_DEX_sets_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xCA;
+
+    cpu_reset(&cpu, mem);
+    cpu.X = 0x01;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(1, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_DEX_sets_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xCA;
+
+    cpu_reset(&cpu, mem);
+    cpu.X = 0x00;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(1, cpu.N);
+}
+
+void test_DEX_clears_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xCA;
+
+    cpu_reset(&cpu, mem);
+    cpu.Z = 1;
+    cpu.X = 0x02;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_DEX_clears_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xCA;
+
+    cpu_reset(&cpu, mem);
+    cpu.N = 1;
+    cpu.X = 0x80;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_DEX_returns_two_cycles(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xCA;
+
+    cpu_reset(&cpu, mem);
+    cpu.X = 0xFC;
+    int cycle = cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(2, cycle);
+}
+
+void test_DEX_wraps_around(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xCA;
+
+    cpu_reset(&cpu, mem);
+    cpu.X = 0x00;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0xFF, cpu.X);
+}
+
 int main(void) {
 
     UNITY_BEGIN();
@@ -4156,5 +4276,15 @@ int main(void) {
     RUN_TEST(test_INY_clears_negative_flag);
     RUN_TEST(test_INY_returns_two_cycles);
     RUN_TEST(test_INY_wraps_around);
+
+    //DEX Tests
+    //Implied
+    RUN_TEST(test_DEX_decrements_x_register);
+    RUN_TEST(test_DEX_sets_zero_flag);
+    RUN_TEST(test_DEX_sets_negative_flag);
+    RUN_TEST(test_DEX_clears_zero_flag);
+    RUN_TEST(test_DEX_clears_negative_flag);
+    RUN_TEST(test_DEX_returns_two_cycles);
+    RUN_TEST(test_DEX_wraps_around);
     return UNITY_END();
 }
