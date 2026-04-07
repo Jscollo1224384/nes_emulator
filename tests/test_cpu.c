@@ -4113,6 +4113,99 @@ void test_DEY_wraps_around(void)
     TEST_ASSERT_EQUAL(0xFF, cpu.Y);
 }
 
+/** JMP Absolute Tests ****************************************************************************/
+void test_JMP_absolute_jumps_to_address(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0x4C;
+    mem[0x8001] = 0x00;
+    mem[0x8002] = 0x01;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0x0100, cpu.PC);
+}
+
+void test_JMP_absolute_returns_three_cycles(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0x4C;
+    mem[0x8001] = 0x00;
+    mem[0x8002] = 0x01;
+
+    cpu_reset(&cpu, mem);
+    int cycle = cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(3, cycle);
+}
+
+/** JMP Absolute Tests ****************************************************************************/
+void test_JMP_indirect_jumps_to_address(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0x6C;
+    mem[0x8001] = 0x00;
+    mem[0x8002] = 0x01;
+    mem[0x0100] = 0x00;
+    mem[0x0101] = 0x20;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0x2000, cpu.PC);
+}
+
+void test_JMP_indirect_returns_five_cycles(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0x6C;
+    mem[0x8001] = 0x00;
+    mem[0x8002] = 0x01;
+    mem[0x0100] = 0x00;
+    mem[0x0101] = 0x20;
+
+    cpu_reset(&cpu, mem);
+    int cycle = cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(5, cycle);
+}
+
+void test_JMP_indirect_page_boundary_bug(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0x6C;
+    mem[0x8001] = 0xFF;
+    mem[0x8002] = 0x10;
+    mem[0x10FF] = 0x00;
+    mem[0x1000] = 0x20;
+    mem[0x1100] = 0x30;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0x2000, cpu.PC);
+}
 
 int main(void) {
 
@@ -4414,5 +4507,16 @@ int main(void) {
     RUN_TEST(test_DEY_clears_negative_flag);
     RUN_TEST(test_DEY_returns_two_cycles);
     RUN_TEST(test_DEY_wraps_around);
+
+    //JMP Tests
+    //Addressing Mode
+    //Absolute
+    RUN_TEST(test_JMP_absolute_jumps_to_address);
+    RUN_TEST(test_JMP_absolute_returns_three_cycles);
+    //Indirect
+    RUN_TEST(test_JMP_indirect_jumps_to_address);
+    RUN_TEST(test_JMP_indirect_returns_five_cycles);
+    RUN_TEST(test_JMP_indirect_page_boundary_bug);
+
     return UNITY_END();
 }
