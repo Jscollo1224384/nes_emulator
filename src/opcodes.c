@@ -447,6 +447,29 @@ int op_dex_implied(CPU *cpu, uint8_t *mem)
     cpu->N = (cpu->X & 0x80) ? 1 : 0;
     return 2;
 }
+
+// JMP absolute (0x4C) - Jump to a 16-bit address specified directly in the operand.
+int op_jmp_absolute(CPU *cpu, uint8_t *mem)
+{
+    uint8_t lo = mem[cpu->PC++];
+    uint8_t hi = mem[cpu->PC++];
+    uint16_t address = (uint16_t)(hi << 8) | lo;
+    cpu->PC = address;
+    return 3;
+}
+
+// JMP absolute (0x6C) - Jump to the address stored at the 16-bit pointer specified in the operand.
+int op_jmp_indirect(CPU *cpu, uint8_t *mem)
+{
+    uint8_t lo = mem[cpu->PC++];
+    uint8_t hi = mem[cpu->PC++];
+    uint16_t pointer_to_address = (uint16_t)(hi << 8) | lo;
+    lo = mem[pointer_to_address];
+    hi = mem[(pointer_to_address & 0xFF00) | (uint8_t)(pointer_to_address + 1)]; // This line mimics a known hardware bug in the 6502. NES games were written to work with the bug, hence the bug needing to be emulated.
+    uint16_t target_address = (uint16_t)(hi << 8) | lo;
+    cpu->PC = target_address;
+    return 5;
+}
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -499,5 +522,7 @@ const OpcodeEntry opcode_table[256] = {
     [0x28] = { op_plp_implied,     "PLP implied"     },
     [0xE8] = { op_inx_implied,     "INX implied"     },
     [0xC8] = { op_iny_implied,     "INY implied"     },
-    [0xCA] = { op_dex_implied,     "DEX implied"     }
+    [0xCA] = { op_dex_implied,     "DEX implied"     },
+    [0x4C] = { op_jmp_absolute,    "JMP absolute"    },
+    [0x6C] = { op_jmp_indirect,    "JMP indirect"    }
 };
