@@ -481,6 +481,21 @@ int op_jmp_indirect(CPU *cpu, uint8_t *mem)
     return 5;
 }
 
+// JSR absolute (0x20) - Jumps to a subroutine by pushing the return address onto the stack and setting the PC to the address of the subroutine.
+int op_jsr_absolute(CPU *cpu, uint8_t *mem)
+{
+    uint8_t lo = mem[cpu->PC++];
+    uint8_t hi = mem[cpu->PC++];
+    uint16_t return_address = cpu->PC -1;
+    mem[0x0100 + cpu->SP] = (return_address >> 8) & 0xFF;
+    cpu->SP--;
+    mem[0x0100 + cpu->SP] = return_address & 0xFF;
+    cpu->SP--;
+    uint16_t target_address = (uint16_t)(hi << 8) | lo;
+    cpu->PC = target_address;
+    return 6;
+}
+
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -536,5 +551,6 @@ const OpcodeEntry opcode_table[256] = {
     [0xCA] = { op_dex_implied,     "DEX implied"     },
     [0x88] = { op_dey_implied,     "DEY implied"     },
     [0x4C] = { op_jmp_absolute,    "JMP absolute"    },
-    [0x6C] = { op_jmp_indirect,    "JMP indirect"    }
+    [0x6C] = { op_jmp_indirect,    "JMP indirect"    },
+    [0x20] = { op_jsr_absolute,    "JSR absolute"    }
 };
