@@ -4148,7 +4148,7 @@ void test_JMP_absolute_returns_three_cycles(void)
     TEST_ASSERT_EQUAL(3, cycle);
 }
 
-/** JMP Absolute Tests ****************************************************************************/
+/** JMP Indirect Tests ****************************************************************************/
 void test_JMP_indirect_jumps_to_address(void)
 {
     CPU cpu;
@@ -4207,6 +4207,7 @@ void test_JMP_indirect_page_boundary_bug(void)
     TEST_ASSERT_EQUAL(0x2000, cpu.PC);
 }
 
+/** JSR Tests ****************************************************************************/
 void test_JSR_jumps_to_subroutine(void)
 {
     CPU cpu;
@@ -4291,6 +4292,65 @@ void test_JSR_returns_six_cycles(void)
 
     TEST_ASSERT_EQUAL(6, cycle);
 }
+
+/** RTS Tests ****************************************************************************/
+void test_RTS_returns_from_subroutine(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0x20;
+    mem[0x8001] = 0x00;
+    mem[0x8002] = 0x02;
+    mem[0x0200] = 0x60;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0x8003, cpu.PC);
+}
+
+void test_RTS_increments_stack_pointer_twice(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0x20;
+    mem[0x8001] = 0x00;
+    mem[0x8002] = 0x02;
+    mem[0x0200] = 0x60;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0xFD, cpu.SP);
+}
+
+void test_RTS_returns_six_cycles(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0x20;
+    mem[0x8001] = 0x00;
+    mem[0x8002] = 0x02;
+    mem[0x0200] = 0x60;
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    int cycle = cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(6, cycle);
+}
+
 int main(void) {
 
     UNITY_BEGIN();
@@ -4609,6 +4669,12 @@ int main(void) {
     RUN_TEST(test_JSR_pushes_return_address_low_byte);
     RUN_TEST(test_JSR_decrements_stack_pointer_twice);
     RUN_TEST(test_JSR_returns_six_cycles);
+
+    //RTS Tests
+    //Implied
+    RUN_TEST(test_RTS_returns_from_subroutine);
+    RUN_TEST(test_RTS_increments_stack_pointer_twice);
+    RUN_TEST(test_RTS_returns_six_cycles);
 
     return UNITY_END();
 }

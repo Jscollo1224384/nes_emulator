@@ -62,6 +62,8 @@ int op_dey_implied(CPU *cpu, uint8_t *mem);
 int op_jmp_absolute(CPU *cpu, uint8_t *mem);
 int op_jmp_indirect(CPU *cpu, uint8_t *mem);
 int op_jsr_absolute(CPU *cpu, uint8_t *mem);
+int op_rts_implied(CPU *cpu, uint8_t *mem);
+
 
 
 
