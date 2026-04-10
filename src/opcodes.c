@@ -508,6 +508,16 @@ int op_rts_implied(CPU *cpu, uint8_t *mem)
     return 6;
 }
 
+// AND immediate (0x29) - Takes the next byte and does an AND operation on the value stored in the accumulator.
+int op_and_immediate(CPU *cpu, uint8_t *mem)
+{
+    uint8_t operand = mem[cpu->PC++];
+    cpu->A = cpu->A & operand;
+    cpu->Z = (cpu->A == 0);
+    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    return 2;
+}
+
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -565,5 +575,6 @@ const OpcodeEntry opcode_table[256] = {
     [0x4C] = { op_jmp_absolute,    "JMP absolute"    },
     [0x6C] = { op_jmp_indirect,    "JMP indirect"    },
     [0x20] = { op_jsr_absolute,    "JSR absolute"    },
-    [0x60] = { op_rts_implied,     "RTS implied"     }
+    [0x60] = { op_rts_implied,     "RTS implied"     },
+    [0x29] = { op_and_immediate,   "AND immediate"   }
 };

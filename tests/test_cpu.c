@@ -4351,6 +4351,25 @@ void test_RTS_returns_six_cycles(void)
     TEST_ASSERT_EQUAL(6, cycle);
 }
 
+void test_AND_immediate_performs_and_operation(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b01000010; //0x42
+    mem[0x8002] = 0x29;
+    mem[0x8003] = 0b01000000; //0x40
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0b01000000 /*0x40*/, cpu.A);
+}
+
 int main(void) {
 
     UNITY_BEGIN();
@@ -4675,6 +4694,11 @@ int main(void) {
     RUN_TEST(test_RTS_returns_from_subroutine);
     RUN_TEST(test_RTS_increments_stack_pointer_twice);
     RUN_TEST(test_RTS_returns_six_cycles);
+
+    //AND Tests
+    //Addressing Mode
+    //Immediate
+    RUN_TEST(test_AND_immediate_performs_and_operation);
 
     return UNITY_END();
 }

@@ -63,11 +63,7 @@ int op_jmp_absolute(CPU *cpu, uint8_t *mem);
 int op_jmp_indirect(CPU *cpu, uint8_t *mem);
 int op_jsr_absolute(CPU *cpu, uint8_t *mem);
 int op_rts_implied(CPU *cpu, uint8_t *mem);
-
-
-
-
-
+int op_and_immediate(CPU *cpu, uint8_t *mem);
 
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem);
