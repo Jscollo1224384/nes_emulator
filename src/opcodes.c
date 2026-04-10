@@ -496,6 +496,18 @@ int op_jsr_absolute(CPU *cpu, uint8_t *mem)
     return 6;
 }
 
+// RTS indirect (0x60) - Returns from a subroutine by pulling the return address from the stack and setting the PC to PC + 1.
+int op_rts_implied(CPU *cpu, uint8_t *mem)
+{
+    cpu->SP++;
+    uint8_t lo = mem[0x0100 + cpu->SP];
+    cpu->SP++;
+    uint8_t hi = mem[0x0100 + cpu->SP];
+    uint16_t return_address = (uint16_t)(hi << 8) | lo;
+    cpu->PC = return_address + 1;
+    return 6;
+}
+
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -552,5 +564,6 @@ const OpcodeEntry opcode_table[256] = {
     [0x88] = { op_dey_implied,     "DEY implied"     },
     [0x4C] = { op_jmp_absolute,    "JMP absolute"    },
     [0x6C] = { op_jmp_indirect,    "JMP indirect"    },
-    [0x20] = { op_jsr_absolute,    "JSR absolute"    }
+    [0x20] = { op_jsr_absolute,    "JSR absolute"    },
+    [0x60] = { op_rts_implied,     "RTS implied"     }
 };
