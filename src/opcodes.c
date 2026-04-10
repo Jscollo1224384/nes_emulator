@@ -1,5 +1,7 @@
 #include "opcodes.h"
 
+#include <stdio.h>
+
 //All opcode functions return cycles;
 
 // LDA immediate (0xA9) - Load accumulator with immediate value
@@ -518,6 +520,17 @@ int op_and_immediate(CPU *cpu, uint8_t *mem)
     return 2;
 }
 
+// AND zero-page (0x25) - Takes the next byte and does an AND operation on the value stored in the accumulator from a zero-page address.
+int op_and_zeropage(CPU *cpu, uint8_t *mem)
+{
+    uint8_t operand = mem[cpu->PC++];
+    uint8_t value_to_and = mem[operand];
+    cpu->A = cpu->A & value_to_and;
+    cpu->Z = (cpu->A == 0);
+    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    return 3;
+}
+
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -576,5 +589,6 @@ const OpcodeEntry opcode_table[256] = {
     [0x6C] = { op_jmp_indirect,    "JMP indirect"    },
     [0x20] = { op_jsr_absolute,    "JSR absolute"    },
     [0x60] = { op_rts_implied,     "RTS implied"     },
-    [0x29] = { op_and_immediate,   "AND immediate"   }
+    [0x29] = { op_and_immediate,   "AND immediate"   },
+    [0x25] = { op_and_zeropage,    "AND zero page"   }
 };
