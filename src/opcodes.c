@@ -531,6 +531,18 @@ int op_and_zeropage(CPU *cpu, uint8_t *mem)
     return 3;
 }
 
+// AND absolute (0x2D) - Takes the next byte and does an AND operation on the value stored in the accumulator from a 16-bit address.
+int op_and_absolute(CPU *cpu, uint8_t *mem)
+{
+    uint8_t lo = mem[cpu->PC++];
+    uint8_t hi = mem[cpu->PC++];
+    uint16_t address = (uint16_t)(hi << 8)| lo;
+    uint8_t value_to_and = mem[address];
+    cpu->A = cpu->A & value_to_and;
+    cpu->Z = (cpu->A == 0);
+    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    return 4;
+}
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -590,5 +602,6 @@ const OpcodeEntry opcode_table[256] = {
     [0x20] = { op_jsr_absolute,    "JSR absolute"    },
     [0x60] = { op_rts_implied,     "RTS implied"     },
     [0x29] = { op_and_immediate,   "AND immediate"   },
-    [0x25] = { op_and_zeropage,    "AND zero page"   }
+    [0x25] = { op_and_zeropage,    "AND zero page"   },
+    [0x2D] = { op_and_absolute,    "AND absolute"    }
 };
