@@ -543,6 +543,16 @@ int op_and_absolute(CPU *cpu, uint8_t *mem)
     cpu->N = (cpu->A & 0x80) ? 1 : 0;
     return 4;
 }
+
+// AND zero page, X (0x35) - Takes the next byte as a zero page address, adds the X register as an offset (wrapping within zero page), and ANDs the value at that address with the accumulator.
+int op_and_zero_page_x(CPU *cpu, uint8_t *mem)
+{
+    uint8_t address = mem[cpu->PC++];
+    cpu->A = cpu->A & mem[(uint8_t)(address + cpu->X)]; //cast as uint8_t to maintain 8 bits and keep zero page.
+    cpu->Z = (cpu->A == 0);
+    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    return 4;
+}
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -603,5 +613,6 @@ const OpcodeEntry opcode_table[256] = {
     [0x60] = { op_rts_implied,     "RTS implied"     },
     [0x29] = { op_and_immediate,   "AND immediate"   },
     [0x25] = { op_and_zeropage,    "AND zero page"   },
-    [0x2D] = { op_and_absolute,    "AND absolute"    }
+    [0x2D] = { op_and_absolute,    "AND absolute"    },
+    [0x35] = { op_and_zero_page_x, "AND Zero page X" }
 };
