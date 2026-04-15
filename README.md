@@ -607,6 +607,24 @@ Use this to track progress. Each milestone should have passing tests before you 
 - [x] **M2** — CPU core structure implemented with reset and step functions
 - [x] **M3** — Opcode dispatch system with 256-entry lookup table implemented
 - [x] **M4** — Comprehensive CPU test suite with 121KB of test coverage
+  - **Completed Instruction Sets (42 opcodes):**
+    - **Load Operations:** LDA, LDX, LDY (all addressing modes)
+    - **Store Operations:** STA, STX, STY (all addressing modes) 
+    - **Transfer Operations:** TAX, TAY, TXA, TYA, TSX, TXS
+    - **Stack Operations:** PHA, PLA, PHP, PLP
+    - **Increment/Decrement:** INX, INY, DEX, DEY
+    - **Jump Operations:** JMP (absolute, indirect), JSR, RTS
+    - **Logical Operations:** AND (5/8 addressing modes completed)
+    - ✅ Completed: immediate, zero page, absolute, zero page X, absolute X
+    - 🔄 Remaining: absolute Y, zero page Y, indirect X/Y
+  - **Remaining Instruction Sets (109 opcodes):**
+    - **Logical Operations:** ORA, EOR, BIT (remaining addressing modes)
+    - **Arithmetic Operations:** ADC, SBC, CMP, CPX, CPY
+    - **Shift/Rotate Operations:** ASL, LSR, ROL, ROR
+    - **Branch Operations:** BCC, BCS, BEQ, BNE, BMI, BPL, BVC, BVS
+    - **Status Flag Operations:** CLC, CLD, CLI, CLV, SEC, SED, SEI
+    - **Jump/Subroutine:** BRK, RTI
+    - **No-Operation:** NOP
 - [ ] **M5** — All 151 official opcodes passing; nestest.log diff is clean
 - [ ] **M6** — iNES ROM parser correct; Mapper 0 PRG ROM reads working
 - [ ] **M7** — PPU registers read/write with correct side effects; NMI fires at correct scanline
