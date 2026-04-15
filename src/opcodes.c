@@ -553,6 +553,20 @@ int op_and_zero_page_x(CPU *cpu, uint8_t *mem)
     cpu->N = (cpu->A & 0x80) ? 1 : 0;
     return 4;
 }
+
+// AND absolute X (0x3D) - Takes the low byte and a high byte to make a 16-bit address, adds the X register as an offset (accounts for page cross), and ANDs the value at that address with the accumulator.
+int op_and_absolute_x(CPU *cpu, uint8_t *mem)
+{
+    uint8_t lo = mem[cpu->PC++];
+    uint8_t hi = mem[cpu->PC++];
+    uint16_t address = (uint16_t)(hi << 8) | lo;
+    uint16_t effective_address = (uint16_t)address + cpu->X;
+    cpu->A = cpu->A & mem[effective_address];
+    cpu->Z = (cpu->A == 0);
+    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    int page_crossed = (address & 0xFF00) != (effective_address & 0xFF00);
+    return page_crossed ? 5 : 4;
+}
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -614,5 +628,6 @@ const OpcodeEntry opcode_table[256] = {
     [0x29] = { op_and_immediate,   "AND immediate"   },
     [0x25] = { op_and_zeropage,    "AND zero page"   },
     [0x2D] = { op_and_absolute,    "AND absolute"    },
-    [0x35] = { op_and_zero_page_x, "AND Zero page X" }
+    [0x35] = { op_and_zero_page_x, "AND Zero page X" },
+    [0x3D] = { op_and_absolute_x,  "AND absolute X"  }
 };
