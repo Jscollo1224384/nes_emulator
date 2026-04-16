@@ -4749,8 +4749,8 @@ void test_AND_zeropage_x_ands_accumulator_with_x_offset_value(void)
     mem[0x0005] = 0b01000000; //0x40
 
     cpu_reset(&cpu, mem);
-    cpu_step(&cpu, mem);
     cpu.X = 0x05;
+    cpu_step(&cpu, mem);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_EQUAL(0b01000000, cpu.A);
@@ -4770,8 +4770,8 @@ void test_AND_zeropage_x_sets_zero_flag(void)
     mem[0x0005] = 0b00000000; //0x00
 
     cpu_reset(&cpu, mem);
-    cpu_step(&cpu, mem);
     cpu.X = 0x05;
+    cpu_step(&cpu, mem);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_EQUAL(1, cpu.Z);
@@ -4792,8 +4792,8 @@ void test_AND_zeropage_x_sets_negative_flag(void)
     mem[0x0005] = 0b10000000; //0x80
 
     cpu_reset(&cpu, mem);
-    cpu_step(&cpu, mem);
     cpu.X = 0x05;
+    cpu_step(&cpu, mem);
     cpu.N = 0;
     cpu_step(&cpu, mem);
 
@@ -4815,8 +4815,8 @@ void test_AND_zeropage_x_clears_zero_flag(void)
     mem[0x0005] = 0b00000001; //0x01
 
     cpu_reset(&cpu, mem);
-    cpu_step(&cpu, mem);
     cpu.X = 0x05;
+    cpu_step(&cpu, mem);
     cpu.Z = 1;
     cpu_step(&cpu, mem);
 
@@ -4838,8 +4838,8 @@ void test_AND_zeropage_x_clears_negative_flag(void)
     mem[0x0005] = 0b00000001; //0x01
 
     cpu_reset(&cpu, mem);
-    cpu_step(&cpu, mem);
     cpu.X = 0x05;
+    cpu_step(&cpu, mem);
     cpu.N = 1;
     cpu_step(&cpu, mem);
 
@@ -4861,8 +4861,8 @@ void test_AND_zeropage_x_returns_four_cycles(void)
     mem[0x0005] = 0b01000000; //0x40
 
     cpu_reset(&cpu, mem);
-    cpu_step(&cpu, mem);
     cpu.X = 0x05;
+    cpu_step(&cpu, mem);
     int cycle = cpu_step(&cpu, mem);
 
     TEST_ASSERT_EQUAL(4, cycle);
@@ -4882,18 +4882,18 @@ void test_AND_zeropage_x_wraps_around_zero_page(void)
     mem[0x0004] = 0b01000000; //0x40
 
     cpu_reset(&cpu, mem);
-    cpu_step(&cpu, mem);
     cpu.X = 0x05;
+    cpu_step(&cpu, mem);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_EQUAL(0b01000000, cpu.A);
 }
 
+/** AND Absolute X Tests *********************************************************************************************************/
 void test_AND_absolute_x_ands_accumulator_with_x_offset_value (void)
 {
     CPU cpu;
     uint8_t mem[0x10000] = {0};
-
     mem[0xFFFC] = 0x00;
     mem[0xFFFD] = 0x80;
     mem[0x8000] = 0xA9;
@@ -4904,8 +4904,8 @@ void test_AND_absolute_x_ands_accumulator_with_x_offset_value (void)
     mem[0x2005] = 0b01000000; //0x40
 
     cpu_reset(&cpu, mem);
-    cpu_step(&cpu, mem);
     cpu.X = 0x05;
+    cpu_step(&cpu, mem);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_EQUAL(0b01000000, cpu.A);
@@ -4926,8 +4926,8 @@ void test_AND_absolute_x_sets_zero_flag(void)
     mem[0x2005] = 0b00000000; //0x00
 
     cpu_reset(&cpu, mem);
-    cpu_step(&cpu, mem);
     cpu.X = 0x05;
+    cpu_step(&cpu, mem);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_EQUAL(1, cpu.Z);
@@ -4949,8 +4949,8 @@ void test_AND_absolute_x_sets_negative_flag(void)
     mem[0x2005] = 0b10000000; //0x80
 
     cpu_reset(&cpu, mem);
-    cpu_step(&cpu, mem);
     cpu.X = 0x05;
+    cpu_step(&cpu, mem);
     cpu.N = 0;
     cpu_step(&cpu, mem);
 
@@ -4973,8 +4973,8 @@ void test_AND_absolute_x_clears_zero_flag(void)
     mem[0x2005] = 0b00000001; //0x01
 
     cpu_reset(&cpu, mem);
-    cpu_step(&cpu, mem);
     cpu.X = 0x05;
+    cpu_step(&cpu, mem);
     cpu.Z = 1;
     cpu_step(&cpu, mem);
 
@@ -4997,8 +4997,8 @@ void test_AND_absolute_x_clears_negative_flag(void)
     mem[0x2005] = 0b00000001; //0x01
 
     cpu_reset(&cpu, mem);
-    cpu_step(&cpu, mem);
     cpu.X = 0x05;
+    cpu_step(&cpu, mem);
     cpu.N = 1;
     cpu_step(&cpu, mem);
 
@@ -5021,8 +5021,8 @@ void test_AND_absolute_x_returns_four_cycles(void)
     mem[0x2005] = 0b01000000; //0x40
 
     cpu_reset(&cpu, mem);
-    cpu_step(&cpu, mem);
     cpu.X = 0x05;
+    cpu_step(&cpu, mem);
     int cycle = cpu_step(&cpu, mem);
 
     TEST_ASSERT_EQUAL(4, cycle);
@@ -5043,13 +5043,14 @@ void test_AND_absolute_x_returns_five_cycles_on_page_cross(void)
     mem[0x2104] = 0b01000000; //0x40
 
     cpu_reset(&cpu, mem);
-    cpu_step(&cpu, mem);
     cpu.X = 0x05;
+    cpu_step(&cpu, mem);
     int cycle = cpu_step(&cpu, mem);
 
     TEST_ASSERT_EQUAL(5, cycle);
 }
 
+/** AND Absolute Y tests ********************************************************************************************/
 void test_AND_absolute_y_ands_accumulator_with_y_offset_value(void)
 {
     CPU cpu;
@@ -5065,11 +5066,150 @@ void test_AND_absolute_y_ands_accumulator_with_y_offset_value(void)
     mem[0x2005] = 0b01000000; //0x40
 
     cpu_reset(&cpu, mem);
-    cpu_step(&cpu, mem);
     cpu.Y = 0x05;
+    cpu_step(&cpu, mem);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_EQUAL(0b01000000, cpu.A);
+}
+
+void test_AND_absolute_y_sets_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b01000010; //0x42
+    mem[0x8002] = 0x39;
+    mem[0x8003] = 0x00;
+    mem[0x8004] = 0x20;
+    mem[0x2005] = 0b00000000; //0x00
+
+    cpu_reset(&cpu, mem);
+    cpu.Y = 0x05;
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(1, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_AND_absolute_y_sets_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b10000001; //0x81
+    mem[0x8002] = 0x39;
+    mem[0x8003] = 0x00;
+    mem[0x8004] = 0x20;
+    mem[0x2005] = 0b10000000; //0x80
+
+    cpu_reset(&cpu, mem);
+    cpu.Y = 0x05;
+    cpu_step(&cpu, mem);
+    cpu.N = 0;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(1, cpu.N);
+}
+
+void test_AND_absolute_y_clears_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b00000001; //0x01
+    mem[0x8002] = 0x39;
+    mem[0x8003] = 0x00;
+    mem[0x8004] = 0x20;
+    mem[0x2005] = 0b00000001; //0x01
+
+    cpu_reset(&cpu, mem);
+    cpu.Y = 0x05;
+    cpu_step(&cpu, mem);
+    cpu.Z = 1;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_AND_absolute_y_clears_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b10000001; //0x81
+    mem[0x8002] = 0x39;
+    mem[0x8003] = 0x00;
+    mem[0x8004] = 0x20;
+    mem[0x2005] = 0b00000001; //0x01
+
+    cpu_reset(&cpu, mem);
+    cpu.Y = 0x05;
+    cpu_step(&cpu, mem);
+    cpu.N = 1;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_AND_absolute_y_returns_four_cycles(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b01000010; //0x42
+    mem[0x8002] = 0x39;
+    mem[0x8003] = 0x00;
+    mem[0x8004] = 0x20;
+    mem[0x2005] = 0b01000000; //0x40
+
+    cpu_reset(&cpu, mem);
+    cpu.Y = 0x05;
+    cpu_step(&cpu, mem);
+    int cycle = cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(4, cycle);
+}
+
+void test_AND_absolute_y_returns_five_cycles_on_page_cross(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b01000010; //0x42
+    mem[0x8002] = 0x39;
+    mem[0x8003] = 0xFF;
+    mem[0x8004] = 0x20;
+    mem[0x2104] = 0b01000000; //0x40
+
+    cpu_reset(&cpu, mem);
+    cpu.Y = 0x05;
+    cpu_step(&cpu, mem);
+    int cycle = cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(5, cycle);
 }
 
 int main(void) {
@@ -5443,6 +5583,11 @@ int main(void) {
 
     //Absolute page y
     RUN_TEST(test_AND_absolute_y_ands_accumulator_with_y_offset_value);
-
+    RUN_TEST(test_AND_absolute_y_sets_zero_flag);
+    RUN_TEST(test_AND_absolute_y_sets_negative_flag);
+    RUN_TEST(test_AND_absolute_y_clears_zero_flag);
+    RUN_TEST(test_AND_absolute_y_clears_negative_flag);
+    RUN_TEST(test_AND_absolute_y_returns_four_cycles);
+    RUN_TEST(test_AND_absolute_y_returns_five_cycles_on_page_cross);
     return UNITY_END();
 }
