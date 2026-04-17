@@ -596,6 +596,21 @@ int op_and_indirect_x(CPU *cpu, uint8_t *mem)
     return 6;
 }
 
+// AND indirect Y (0x31) - Takes a zero page address, reads a 16-bit pointer from it, adds the Y register as an offset to that pointer (accounting for page cross), and ANDs the value at the resulting address with the accumulator.
+int op_and_indirect_y(CPU *cpu, uint8_t *mem)
+{
+    uint8_t operand = mem[cpu->PC++];
+    uint8_t lo = mem[operand];
+    uint8_t hi = mem[(uint8_t)operand + 1];
+    uint16_t address = ((uint16_t)(hi << 8) | lo);
+    uint16_t effective_address = (uint16_t)address + cpu->Y;
+    cpu->A = cpu->A & mem[effective_address];
+    cpu->Z = (cpu->A == 0);
+    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    int page_crossed = (address & 0xFF00) != (effective_address & 0xFF00);
+    return page_crossed ? 6 : 5;
+}
+
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -660,5 +675,6 @@ const OpcodeEntry opcode_table[256] = {
     [0x35] = { op_and_zero_page_x, "AND Zero page X" },
     [0x3D] = { op_and_absolute_x,  "AND absolute X"  },
     [0x39] = { op_and_absolute_y,  "AND absolute Y"  },
-    [0x21] = { op_and_indirect_x,  "AND indirect X"  }
+    [0x21] = { op_and_indirect_x,  "AND indirect X"  },
+    [0x31] = { op_and_indirect_y,  "AND indirect Y"  }
 };
