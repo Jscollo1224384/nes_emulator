@@ -616,7 +616,7 @@ Use this to track progress. Each milestone should have passing tests before you 
     - **Jump Operations:** JMP (absolute, indirect), JSR, RTS
     - **Logical Operations:** AND (5/8 addressing modes completed)
     - ✅ Completed: immediate, zero page, absolute, zero page X, absolute X
-    - 🔄 Remaining: absolute Y, zero page Y, indirect X/Y
+    - 🔄 Remaining: absolute Y, indirect X/Y
   - **Remaining Instruction Sets (109 opcodes):**
     - **Logical Operations:** ORA, EOR, BIT (remaining addressing modes)
     - **Arithmetic Operations:** ADC, SBC, CMP, CPX, CPY
