@@ -69,6 +69,8 @@ int op_and_absolute(CPU *cpu, uint8_t *mem);
 int op_and_zero_page_x(CPU *cpu, uint8_t *mem);
 int op_and_absolute_x(CPU *cpu, uint8_t *mem);
 int op_and_absolute_y(CPU *cpu, uint8_t *mem);
+int op_and_indirect_x(CPU *cpu, uint8_t *mem);
+
 
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem);
