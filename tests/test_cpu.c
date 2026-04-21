@@ -5358,7 +5358,7 @@ void test_AND_indirect_x_returns_six_cycles(void)
     TEST_ASSERT_EQUAL(6, cycle);
 }
 
-/** AND Indirect X Tests ****************************************************************************************/
+/** AND Indirect Y Tests ****************************************************************************************/
 void test_AND_indirect_y_ands_accumulator_with_indirect_y_offset_value(void)
 {
     CPU cpu;
@@ -5775,6 +5775,161 @@ void test_ORA_zeropage_returns_three_cycles(void)
     TEST_ASSERT_EQUAL(3, cycle);
 }
 
+/** ORA Zero Page X Tests **************************************************************************************/
+void test_ORA_zeropage_x_ors_accumulator_with_x_offset_value(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b01000010; //0x42
+    mem[0x8002] = 0x15;
+    mem[0x8003] = 0x00;
+    mem[0x0005] = 0b01000000; //0x40
+
+    cpu_reset(&cpu, mem);
+    cpu.X = 0x05;
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0b01000010, cpu.A);
+}
+
+void test_ORA_zeropage_x_sets_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b00000000; //0x00
+    mem[0x8002] = 0x15;
+    mem[0x8003] = 0x00;
+    mem[0x0005] = 0b00000000; //0x00
+
+    cpu_reset(&cpu, mem);
+    cpu.X = 0x05;
+    cpu_step(&cpu, mem);
+    cpu.Z = 0;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(1, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_ORA_zeropage_x_sets_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b00000001; //0x01
+    mem[0x8002] = 0x15;
+    mem[0x8003] = 0x00;
+    mem[0x0005] = 0b10000000; //0x80
+
+    cpu_reset(&cpu, mem);
+    cpu.X = 0x05;
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(1, cpu.N);
+}
+
+
+void test_ORA_zeropage_x_clears_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b00000000; //0x00
+    mem[0x8002] = 0x15;
+    mem[0x8003] = 0x00;
+    mem[0x0005] = 0b00000001; //0x01
+
+    cpu_reset(&cpu, mem);
+    cpu.X = 0x05;
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_ORA_zeropage_x_clears_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b00000000; //0x00
+    mem[0x8002] = 0x15;
+    mem[0x8003] = 0x00;
+    mem[0x0005] = 0b00000001; //0x01
+
+    cpu_reset(&cpu, mem);
+    cpu.X = 0x05;
+    cpu_step(&cpu, mem);
+    cpu.N = 1;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_ORA_zeropage_x_returns_four_cycles(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b00000000; //0x00
+    mem[0x8002] = 0x15;
+    mem[0x8003] = 0x00;
+    mem[0x0005] = 0b00000001; //0x01
+
+    cpu_reset(&cpu, mem);
+    cpu.X = 0x05;
+    cpu_step(&cpu, mem);
+    int cycle = cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(4, cycle);
+}
+
+void test_ORA_zeropage_x_wraps_around_zero_page(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b00000000; //0x00
+    mem[0x8002] = 0x15;
+    mem[0x8003] = 0xFF;
+    mem[0x0004] = 0b00000001; //0x01
+
+    cpu_reset(&cpu, mem);
+    cpu.X = 0x05;
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0b00000001, cpu.A);
+}
+
 int main(void) {
 
     UNITY_BEGIN();
@@ -6187,5 +6342,14 @@ int main(void) {
     RUN_TEST(test_ORA_zeropage_clears_zero_flag);
     RUN_TEST(test_ORA_zeropage_clears_negative_flag);
     RUN_TEST(test_ORA_zeropage_returns_three_cycles);
+
+    //Zero page x
+    RUN_TEST(test_ORA_zeropage_x_ors_accumulator_with_x_offset_value);
+    RUN_TEST(test_ORA_zeropage_x_sets_zero_flag);
+    RUN_TEST(test_ORA_zeropage_x_sets_negative_flag);
+    RUN_TEST(test_ORA_zeropage_x_clears_zero_flag);
+    RUN_TEST(test_ORA_zeropage_x_clears_negative_flag);
+    RUN_TEST(test_ORA_zeropage_x_returns_four_cycles);
+    RUN_TEST(test_ORA_zeropage_x_wraps_around_zero_page);
     return UNITY_END();
 }

@@ -19,6 +19,7 @@ extern const OpcodeEntry opcode_table[256];
 // Individual opcode handlers
 int op_lda_immediate(CPU *cpu, uint8_t *mem);
 int op_lda_zero_page(CPU *cpu, uint8_t *mem);
+int op_lda_absolute(CPU *cpu, uint8_t *mem);
 int op_lda_zero_page_x(CPU *cpu, uint8_t *mem);
 int op_lda_absolute_x(CPU *cpu, uint8_t *mem);
 int op_lda_absolute_y(CPU *cpu, uint8_t *mem);
@@ -52,6 +53,7 @@ int op_tya_implied(CPU *cpu, uint8_t *mem);
 int op_tsx_implied(CPU *cpu, uint8_t *mem);
 int op_txs_implied(CPU *cpu, uint8_t *mem);
 int op_pha_implied(CPU *cpu, uint8_t *mem);
+int op_pla_implied(CPU *cpu, uint8_t *mem);
 int op_unimplemented(CPU *cpu, uint8_t *mem);
 int op_php_implied(CPU *cpu, uint8_t *mem);
 int op_plp_implied(CPU *cpu, uint8_t *mem);
@@ -73,6 +75,8 @@ int op_and_indirect_x(CPU *cpu, uint8_t *mem);
 int op_and_indirect_y(CPU *cpu, uint8_t *mem);
 int op_ora_immediate(CPU *cpu, uint8_t *mem);
 int op_ora_zeropage(CPU *cpu, uint8_t *mem);
+int op_ora_zero_page_x(CPU *cpu, uint8_t *mem);
+
 
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem);
