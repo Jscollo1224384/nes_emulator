@@ -655,6 +655,20 @@ int op_ora_absolute(CPU *cpu, uint8_t *mem)
     return 4;
 }
 
+// ORA absolute X (0x1D) - Takes the low byte and a high byte to make a 16-bit address, adds the X register as an offset (accounts for page cross), and ORs the value at that address with the accumulator.
+int op_ora_absolute_x(CPU *cpu, uint8_t *mem)
+{
+    uint8_t lo = mem[cpu->PC++];
+    uint8_t hi = mem[cpu->PC++];
+    uint16_t address = (uint16_t)(hi << 8) | lo;
+    uint16_t effective_address = address + cpu->X;
+    cpu->A = cpu->A | mem[effective_address];
+    cpu->Z = (cpu->A == 0);
+    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    int page_crossed = (address & 0xFF00) != (effective_address & 0xFF00);
+    return page_crossed ? 5 : 4;
+}
+
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -724,5 +738,6 @@ const OpcodeEntry opcode_table[256] = {
     [0x09] = { op_ora_immediate,   "ORA immediate"   },
     [0x05] = { op_ora_zeropage,    "ORA zero page"   },
     [0x15] = { op_ora_zero_page_x, "ORA zero page X" },
-    [0x0D] = { op_ora_absolute,    "ORA Absolute"    }
+    [0x0D] = { op_ora_absolute,    "ORA Absolute"    },
+    [0x1D] = { op_ora_absolute_x,  "ORA absolute X"  },
 };
