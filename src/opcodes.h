@@ -76,6 +76,8 @@ int op_and_indirect_y(CPU *cpu, uint8_t *mem);
 int op_ora_immediate(CPU *cpu, uint8_t *mem);
 int op_ora_zeropage(CPU *cpu, uint8_t *mem);
 int op_ora_zero_page_x(CPU *cpu, uint8_t *mem);
+int op_ora_absolute(CPU *cpu, uint8_t *mem);
+
 
 
 // Default handler for unimplemented opcodes

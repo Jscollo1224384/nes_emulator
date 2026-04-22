@@ -4601,6 +4601,7 @@ void test_AND_zeropage_returns_three_cycles(void)
     TEST_ASSERT_EQUAL(3, cycle);
 }
 
+/** AND Absolute Tests ******************************************************************************************/
 void test_AND_absolute_performs_and_operation(void)
 {
     CPU cpu;
@@ -5930,6 +5931,140 @@ void test_ORA_zeropage_x_wraps_around_zero_page(void)
     TEST_ASSERT_EQUAL(0b00000001, cpu.A);
 }
 
+/** ORA Absolute Tests ***********************************************************************************/
+void test_ORA_absolute_performs_or_operation(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b01000000; //0x40
+    mem[0x8002] = 0x0D;
+    mem[0x8003] = 0x00; //low  byte
+    mem[0x8004] = 0x50; //high byte
+    mem[0x5000] = 0b01000010; //0x42
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0b01000010, cpu.A);
+}
+
+void test_ORA_absolute_sets_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b00000000; //0x00
+    mem[0x8002] = 0x0D;
+    mem[0x8003] = 0x00; //low  byte
+    mem[0x8004] = 0x50; //high byte
+    mem[0x5000] = 0b00000000; //0x00
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu.Z = 0;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(1, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_ORA_absolute_sets_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b00000000; //0x00
+    mem[0x8002] = 0x0D;
+    mem[0x8003] = 0x00; //low  byte
+    mem[0x8004] = 0x50; //high byte
+    mem[0x5000] = 0b10000000; //0x80
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu.Z = 0;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(1, cpu.N);
+}
+
+void test_ORA_absolute_clears_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b00000000; //0x00
+    mem[0x8002] = 0x0D;
+    mem[0x8003] = 0x00; //low  byte
+    mem[0x8004] = 0x50; //high byte
+    mem[0x5000] = 0b00000001; //0x01
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_ORA_absolute_clears_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b00000000; //0x00
+    mem[0x8002] = 0x0D;
+    mem[0x8003] = 0x00; //low  byte
+    mem[0x8004] = 0x50; //high byte
+    mem[0x5000] = 0b00000001; //0x01
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu.N = 1;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_ORA_absolute_returns_four_cycles(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b00000000; //0x00
+    mem[0x8002] = 0x0D;
+    mem[0x8003] = 0x00; //low  byte
+    mem[0x8004] = 0x50; //high byte
+    mem[0x5000] = 0b00000001; //0x01
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    int cycle = cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(4, cycle);
+}
+
 int main(void) {
 
     UNITY_BEGIN();
@@ -6351,5 +6486,13 @@ int main(void) {
     RUN_TEST(test_ORA_zeropage_x_clears_negative_flag);
     RUN_TEST(test_ORA_zeropage_x_returns_four_cycles);
     RUN_TEST(test_ORA_zeropage_x_wraps_around_zero_page);
+
+    //Absolute
+    RUN_TEST(test_ORA_absolute_performs_or_operation);
+    RUN_TEST(test_ORA_absolute_sets_zero_flag);
+    RUN_TEST(test_ORA_absolute_sets_negative_flag);
+    RUN_TEST(test_ORA_absolute_clears_zero_flag);
+    RUN_TEST(test_ORA_absolute_clears_negative_flag);
+    RUN_TEST(test_ORA_absolute_returns_four_cycles);
     return UNITY_END();
 }

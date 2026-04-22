@@ -642,6 +642,19 @@ int op_ora_zero_page_x(CPU *cpu, uint8_t *mem)
     return 4;
 }
 
+// ORA absolute (0x0D) - Takes the next byte and does an OR operation on the value stored in the accumulator from a 16-bit address.
+int op_ora_absolute(CPU *cpu, uint8_t *mem)
+{
+    uint8_t lo = mem[cpu->PC++];
+    uint8_t hi = mem[cpu->PC++];
+    uint16_t address = (uint16_t)(hi << 8)| lo;
+    uint8_t value_to_or = mem[address];
+    cpu->A = cpu->A | value_to_or;
+    cpu->Z = (cpu->A == 0);
+    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    return 4;
+}
+
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -710,5 +723,6 @@ const OpcodeEntry opcode_table[256] = {
     [0x31] = { op_and_indirect_y,  "AND indirect Y"  },
     [0x09] = { op_ora_immediate,   "ORA immediate"   },
     [0x05] = { op_ora_zeropage,    "ORA zero page"   },
-    [0x15] = { op_ora_zero_page_x, "ORA zero page X" }
+    [0x15] = { op_ora_zero_page_x, "ORA zero page X" },
+    [0x0D] = { op_ora_absolute,    "ORA Absolute"    }
 };
