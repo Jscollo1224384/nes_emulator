@@ -683,6 +683,20 @@ int op_ora_absolute_y(CPU *cpu, uint8_t *mem)
     return page_crossed ? 5 : 4;
 }
 
+// ORA indirect X (0x01) - Takes the next byte from a zero page address, adds the X register as an offset (wrapping within zero page) that holds a pointer to the value to be ORed  with the accumulator.
+int op_ora_indirect_x(CPU *cpu, uint8_t *mem)
+{
+    uint8_t operand = mem[cpu->PC++];
+    uint8_t pointer = (uint8_t)(operand + cpu->X);
+    uint8_t lo = mem[pointer];
+    uint8_t hi = mem[(uint8_t)pointer + 1];
+    uint16_t address = (uint16_t)(hi << 8) | lo;
+    cpu->A = cpu->A | mem[(uint16_t)address];
+    cpu->Z = (cpu->A == 0);
+    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    return 6;
+}
+
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -754,5 +768,6 @@ const OpcodeEntry opcode_table[256] = {
     [0x15] = { op_ora_zero_page_x, "ORA zero page X" },
     [0x0D] = { op_ora_absolute,    "ORA Absolute"    },
     [0x1D] = { op_ora_absolute_x,  "ORA absolute X"  },
-    [0x19] = { op_ora_absolute_y,  "ORA absolute Y"  }
+    [0x19] = { op_ora_absolute_y,  "ORA absolute Y"  },
+    [0x01] = { op_ora_indirect_x,  "ORA indirect X"  }
 };

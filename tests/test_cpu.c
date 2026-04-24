@@ -6378,6 +6378,152 @@ void test_ORA_absolute_y_returns_five_cycles_on_page_cross(void)
     TEST_ASSERT_EQUAL(5, cycle);
 }
 
+/** ORA Indirect Tests *************************************************************************************************/
+void test_ORA_indirect_x_ors_accumulator_with_indexed_indirect_value(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b01000000; //0x40
+    mem[0x8002] = 0x01;
+    mem[0x8003] = 0x00;
+    mem[0x0005] = 0x00;
+    mem[0x0006] = 0x20;
+    mem[0x2000] = 0b01000010; //0x42
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu.X = 0x05;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0b01000010, cpu.A);
+}
+
+void test_ORA_indirect_x_sets_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b00000000; //0x00
+    mem[0x8002] = 0x01;
+    mem[0x8003] = 0x00;
+    mem[0x0005] = 0x00;
+    mem[0x0006] = 0x20;
+    mem[0x2000] = 0b00000000; //0x00
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu.X = 0x05;
+    cpu.Z = 0;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(1, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_ORA_indirect_x_sets_negative_flag(void)
+{
+
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b00000001; //0x01
+    mem[0x8002] = 0x01;
+    mem[0x8003] = 0x00;
+    mem[0x0005] = 0x00;
+    mem[0x0006] = 0x20;
+    mem[0x2000] = 0b10000000; //0x80
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu.X = 0x05;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(1, cpu.N);
+}
+
+void test_ORA_indirect_x_clears_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b00000000; //0x00
+    mem[0x8002] = 0x01;
+    mem[0x8003] = 0x00;
+    mem[0x0005] = 0x00;
+    mem[0x0006] = 0x20;
+    mem[0x2000] = 0b00000001; //0x01
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu.X = 0x05;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_ORA_indirect_x_clears_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b00000000; //0x00
+    mem[0x8002] = 0x01;
+    mem[0x8003] = 0x00;
+    mem[0x0005] = 0x00;
+    mem[0x0006] = 0x20;
+    mem[0x2000] = 0b00000001; //0x01
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu.X = 0x05;
+    cpu.N = 1;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0, cpu.Z);
+    TEST_ASSERT_EQUAL(0, cpu.N);
+}
+
+void test_ORA_indirect_x_returns_six_cycles(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b00000000; //0x00
+    mem[0x8002] = 0x01;
+    mem[0x8003] = 0x00;
+    mem[0x0005] = 0x00;
+    mem[0x0006] = 0x20;
+    mem[0x2000] = 0b00000001; //0x01
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu.X = 0x05;
+    int cycle = cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(6, cycle);
+}
+
 int main(void) {
 
     UNITY_BEGIN();
@@ -6825,5 +6971,13 @@ int main(void) {
     RUN_TEST(test_ORA_absolute_y_clears_negative_flag);
     RUN_TEST(test_ORA_absolute_y_returns_four_cycles);
     RUN_TEST(test_ORA_absolute_y_returns_five_cycles_on_page_cross);
+
+    //Indirect X
+    RUN_TEST(test_ORA_indirect_x_ors_accumulator_with_indexed_indirect_value);
+    RUN_TEST(test_ORA_indirect_x_sets_zero_flag);
+    RUN_TEST(test_ORA_indirect_x_sets_negative_flag);
+    RUN_TEST(test_ORA_indirect_x_clears_zero_flag);
+    RUN_TEST(test_ORA_indirect_x_clears_negative_flag);
+    RUN_TEST(test_ORA_indirect_x_returns_six_cycles);
     return UNITY_END();
 }
