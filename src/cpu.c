@@ -18,6 +18,7 @@ void cpu_reset(CPU *cpu, uint8_t *mem) {
     cpu->I      = 1;                                    // Interrupt disable flag set on reset
     cpu->Z      = 0;                                    // Set when the result of an operation is 0
     cpu->C      = 0;
+    cpu->P      = 0;
     cpu->cycles = 0;
 }
 
