@@ -538,7 +538,7 @@ int op_and_indirect_x(CPU *cpu, uint8_t *mem)
     uint8_t operand = mem[cpu->PC++];
     uint8_t pointer = (uint8_t)(operand + cpu->X);
     uint8_t lo = mem[pointer];
-    uint8_t hi = mem[(uint8_t)pointer + 1];
+    uint8_t hi = mem[(uint8_t)(pointer + 1)];
     uint16_t address = (uint16_t)(hi << 8) | lo;
     cpu->A = cpu->A & mem[(uint16_t)address];
     update_zero_negative_flags(cpu, cpu->A);
@@ -631,7 +631,7 @@ int op_ora_indirect_x(CPU *cpu, uint8_t *mem)
     uint8_t operand = mem[cpu->PC++];
     uint8_t pointer = (uint8_t)(operand + cpu->X);
     uint8_t lo = mem[pointer];
-    uint8_t hi = mem[(uint8_t)pointer + 1];
+    uint8_t hi = mem[(uint8_t)(pointer + 1)];
     uint16_t address = (uint16_t)(hi << 8) | lo;
     cpu->A = cpu->A | mem[(uint16_t)address];
     update_zero_negative_flags(cpu, cpu->A);
