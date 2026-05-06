@@ -10,7 +10,7 @@ void cpu_reset(CPU *cpu, uint8_t *mem) {
     cpu->Y      = 0;                                    // Index Register (counting, offsets, loops))
     cpu->SP     = 0xFD;                                 // Stack pointer starts at 0xFD
     cpu->PC     = mem[0xFFFC] | (mem[0xFFFD] << 8);     // program counter
-    cpu->P      = 0;
+    cpu->P      = 0b00110100;
     cpu->cycles = 0;
 }
 

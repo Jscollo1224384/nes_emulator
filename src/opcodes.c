@@ -195,7 +195,7 @@ int op_ldy_immediate(CPU *cpu, uint8_t *mem)
 {
     uint8_t operand = mem[cpu->PC++];
     cpu->Y = operand;
-    update_zero_negative_flags(cpu, cpu->Y);;
+    update_zero_negative_flags(cpu, cpu->Y);
     return 2;
 }
 
@@ -204,7 +204,7 @@ int op_ldy_zero_page(CPU *cpu, uint8_t *mem)
 {
     uint8_t address = mem[cpu->PC++];
     cpu->Y = mem[address];
-    update_zero_negative_flags(cpu, cpu->Y);;
+    update_zero_negative_flags(cpu, cpu->Y);
     return 3;
 }
 
@@ -213,7 +213,7 @@ int op_ldy_zero_page_x(CPU *cpu, uint8_t *mem)
 {
     uint8_t address = mem[cpu->PC++];
     cpu->Y = mem[(uint8_t)(address + cpu->X)]; //cast as uint8_t to maintain 8 bits and keep zero page.
-    update_zero_negative_flags(cpu, cpu->Y);;
+    update_zero_negative_flags(cpu, cpu->Y);
     return 4;
 }
 
@@ -224,7 +224,7 @@ int op_ldy_absolute(CPU *cpu, uint8_t *mem)
     uint8_t hi = mem[cpu->PC++];
     uint16_t address = (uint16_t)(hi << 8) | lo;
     cpu->Y = mem[address];
-    update_zero_negative_flags(cpu, cpu->Y);;
+    update_zero_negative_flags(cpu, cpu->Y);
     return 4;
 }
 
@@ -236,7 +236,7 @@ int op_ldy_absolute_x(CPU *cpu, uint8_t *mem)
     uint16_t address = (uint16_t)(hi << 8) | lo;
     uint16_t effective_address = (uint16_t)(address + cpu->X);
     cpu->Y = mem[effective_address];
-    update_zero_negative_flags(cpu, cpu->Y);;
+    update_zero_negative_flags(cpu, cpu->Y);
     int page_crossed = (address & 0xFF00) != (effective_address & 0xFF00);
     return page_crossed ? 5 : 4;
 }
@@ -307,7 +307,7 @@ int op_tay_implied(CPU *cpu, uint8_t *mem)
 {
     (void)mem;
     cpu->Y = cpu->A;
-    update_zero_negative_flags(cpu, cpu->Y);;
+    update_zero_negative_flags(cpu, cpu->Y);
     return 2;
 }
 
@@ -394,7 +394,7 @@ int op_iny_implied(CPU *cpu, uint8_t *mem)
 {
     (void)mem;
     cpu->Y++;
-    update_zero_negative_flags(cpu, cpu->Y);;
+    update_zero_negative_flags(cpu, cpu->Y);
     return 2;
 }
 
@@ -412,7 +412,7 @@ int op_dey_implied(CPU *cpu, uint8_t *mem)
 {
     (void)mem;
     cpu->Y--;
-    update_zero_negative_flags(cpu, cpu->Y);;
+    update_zero_negative_flags(cpu, cpu->Y);
     return 2;
 }
 
