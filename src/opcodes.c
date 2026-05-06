@@ -9,8 +9,7 @@ int op_lda_immediate(CPU *cpu, uint8_t *mem)
 {
     uint8_t operand = mem[cpu->PC++];
     cpu->A = operand;
-    cpu->Z = (cpu->A == 0);
-    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->A);
     return 2;
 }
 
@@ -19,8 +18,7 @@ int op_lda_zero_page(CPU *cpu, uint8_t *mem)
 {
     uint8_t address = mem[cpu->PC++];
     cpu->A = mem[address];
-    cpu->Z = (cpu->A == 0);
-    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->A);
     return 3;
 }
 
@@ -31,8 +29,7 @@ int op_lda_absolute(CPU *cpu, uint8_t *mem)
     uint8_t hi = mem[cpu->PC++];
     uint16_t address = (uint16_t)(hi << 8) | lo;
     cpu->A = mem[address];
-    cpu->Z = (cpu->A == 0);
-    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->A);
     return 4;
 }
 
@@ -41,8 +38,7 @@ int op_lda_zero_page_x(CPU *cpu, uint8_t *mem)
 {
     uint8_t address = mem[cpu->PC++];
     cpu->A = mem[(uint8_t)(address + cpu->X)]; //cast as uint8_t to maintain 8 bits and keep zero page.
-    cpu->Z = (cpu->A == 0);
-    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->A);
     return 4;
 }
 
@@ -54,8 +50,7 @@ int op_lda_absolute_x(CPU *cpu, uint8_t *mem)
     uint16_t address = (uint16_t)(hi << 8) | lo;
     uint16_t effective_address = (uint16_t)(address + cpu->X);
     cpu->A = mem[effective_address];
-    cpu->Z = (cpu->A == 0);
-    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->A);
     int page_crossed = (address & 0xFF00) != (effective_address & 0xFF00);
     return page_crossed ? 5 : 4;
 }
@@ -68,8 +63,7 @@ int op_lda_absolute_y(CPU *cpu, uint8_t *mem)
     uint16_t address = (uint16_t)(hi << 8) | lo;
     uint16_t effective_address = (uint16_t)(address + cpu->Y);
     cpu->A = mem[effective_address];
-    cpu->Z = (cpu->A == 0);
-    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->A);
     int page_crossed = (address & 0xFF00) != (effective_address & 0xFF00);
     return page_crossed ? 5 : 4;
 }
@@ -150,8 +144,7 @@ int op_ldx_immediate(CPU *cpu, uint8_t *mem)
 {
     uint8_t operand = mem[cpu->PC++];
     cpu->X = operand;
-    cpu->Z = (cpu->X == 0);
-    cpu->N = (cpu->X & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->X);
     return 2;
 }
 
@@ -160,8 +153,7 @@ int op_ldx_zero_page(CPU *cpu, uint8_t *mem)
 {
     uint8_t address = mem[cpu->PC++];
     cpu->X = mem[address];
-    cpu->Z = (cpu->X == 0);
-    cpu->N = (cpu->X & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->X);
     return 3;
 }
 
@@ -170,8 +162,7 @@ int op_ldx_zero_page_y(CPU *cpu, uint8_t *mem)
 {
     uint8_t address = mem[cpu->PC++];
     cpu->X = mem[(uint8_t)(address + cpu->Y)]; //cast as uint8_t to maintain 8 bits and keep zero page.
-    cpu->Z = (cpu->X == 0);
-    cpu->N = (cpu->X & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->X);
     return 4;
 }
 
@@ -182,8 +173,7 @@ int op_ldx_absolute(CPU *cpu, uint8_t *mem)
     uint8_t hi = mem[cpu->PC++];
     uint16_t address = (uint16_t)(hi << 8) | lo;
     cpu->X = mem[address];
-    cpu->Z = (cpu->X == 0);
-    cpu->N = (cpu->X & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->X);
     return 4;
 }
 
@@ -195,8 +185,7 @@ int op_ldx_absolute_y(CPU *cpu, uint8_t *mem)
     uint16_t address = (uint16_t)(hi << 8) | lo;
     uint16_t effective_address = (uint16_t)(address + cpu->Y);
     cpu->X = mem[effective_address];
-    cpu->Z = (cpu->X == 0);
-    cpu->N = (cpu->X & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->X);
     int page_crossed = (address & 0xFF00) != (effective_address & 0xFF00);
     return page_crossed ? 5 : 4;
 }
@@ -206,8 +195,7 @@ int op_ldy_immediate(CPU *cpu, uint8_t *mem)
 {
     uint8_t operand = mem[cpu->PC++];
     cpu->Y = operand;
-    cpu->Z = (cpu->Y == 0);
-    cpu->N = (cpu->Y & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->Y);;
     return 2;
 }
 
@@ -216,8 +204,7 @@ int op_ldy_zero_page(CPU *cpu, uint8_t *mem)
 {
     uint8_t address = mem[cpu->PC++];
     cpu->Y = mem[address];
-    cpu->Z = (cpu->Y == 0);
-    cpu->N = (cpu->Y & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->Y);;
     return 3;
 }
 
@@ -226,8 +213,7 @@ int op_ldy_zero_page_x(CPU *cpu, uint8_t *mem)
 {
     uint8_t address = mem[cpu->PC++];
     cpu->Y = mem[(uint8_t)(address + cpu->X)]; //cast as uint8_t to maintain 8 bits and keep zero page.
-    cpu->Z = (cpu->Y == 0);
-    cpu->N = (cpu->Y & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->Y);;
     return 4;
 }
 
@@ -238,8 +224,7 @@ int op_ldy_absolute(CPU *cpu, uint8_t *mem)
     uint8_t hi = mem[cpu->PC++];
     uint16_t address = (uint16_t)(hi << 8) | lo;
     cpu->Y = mem[address];
-    cpu->Z = (cpu->Y == 0);
-    cpu->N = (cpu->Y & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->Y);;
     return 4;
 }
 
@@ -251,8 +236,7 @@ int op_ldy_absolute_x(CPU *cpu, uint8_t *mem)
     uint16_t address = (uint16_t)(hi << 8) | lo;
     uint16_t effective_address = (uint16_t)(address + cpu->X);
     cpu->Y = mem[effective_address];
-    cpu->Z = (cpu->Y == 0);
-    cpu->N = (cpu->Y & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->Y);;
     int page_crossed = (address & 0xFF00) != (effective_address & 0xFF00);
     return page_crossed ? 5 : 4;
 }
@@ -314,8 +298,7 @@ int op_tax_implied(CPU *cpu, uint8_t *mem)
 {
     (void)mem;
     cpu->X = cpu->A;
-    cpu->Z = (cpu->X == 0);
-    cpu->N = (cpu->X & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->X);
     return 2;
 }
 
@@ -324,8 +307,7 @@ int op_tay_implied(CPU *cpu, uint8_t *mem)
 {
     (void)mem;
     cpu->Y = cpu->A;
-    cpu->Z = (cpu->Y == 0);
-    cpu->N = (cpu->Y & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->Y);;
     return 2;
 }
 
@@ -334,8 +316,7 @@ int op_txa_implied(CPU *cpu, uint8_t *mem)
 {
     (void)mem;
     cpu->A = cpu->X;
-    cpu->Z = (cpu->A == 0);
-    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->A);
     return 2;
 }
 
@@ -344,8 +325,7 @@ int op_tya_implied(CPU *cpu, uint8_t *mem)
 {
     (void)mem;
     cpu->A = cpu->Y;
-    cpu->Z = (cpu->A == 0);
-    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->A);
     return 2;
 }
 
@@ -354,8 +334,7 @@ int op_tsx_implied(CPU *cpu, uint8_t *mem)
 {
     (void)mem;
     cpu->X = cpu->SP;
-    cpu->Z = (cpu->X == 0);
-    cpu->N = (cpu->X & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->X);
     return 2;
 }
 
@@ -380,53 +359,33 @@ int op_pla_implied(CPU *cpu, uint8_t *mem)
 {
     cpu->SP ++;
     cpu->A = mem[0x0100 + cpu->SP];
-    cpu->Z = (cpu->A == 0);
-    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->A);
     return 4;
 }
 
 // PHP implied (0x08) - Push processor status register onto the stack
 int op_php_implied(CPU *cpu, uint8_t *mem)
 {
-    uint8_t status = (cpu->N << 7) |
-                     (cpu->V << 6) |
-                     (1 << 5)      |  // unused bit, always 1
-                     (cpu->B << 4) |
-                     (cpu->D << 3) |
-                     (cpu->I << 2) |
-                     (cpu->Z << 1) |
-                     (cpu->C << 0);
-    mem[0x0100 + cpu->SP] = status;
+    mem[0x0100 + cpu->SP] = cpu->P | FLAG_B | (1 << 5); // B and unused bit set when pushed
     cpu->SP--;
-
     return 3;
 }
 
-// PLP implied (0x28) - Pull processor status from the stack and unpack its status flags.
+// PLP implied (0x28) - Pull processor status from the stack and restore it.
 int op_plp_implied(CPU *cpu, uint8_t *mem)
 {
     cpu->SP++;
-    uint8_t status = mem[0x0100 + cpu->SP];
-
-    cpu->N = (status >> 7) & 1;
-    cpu->V = (status >> 6) & 1;
-    // bit 5 unused, ignore
-    cpu->B = (status >> 4) & 1;
-    cpu->D = (status >> 3) & 1;
-    cpu->I = (status >> 2) & 1;
-    cpu->Z = (status >> 1) & 1;
-    cpu->C = (status >> 0) & 1;
-
+    cpu->P = mem[0x0100 + cpu->SP];
+    cpu->P &= ~FLAG_B;      // B flag cleared when pulled
+    cpu->P |= (1 << 5);     // unused bit always 1
     return 4;
 }
-
 // INX implied (0xE8) -  Increments the X register by 1.
 int op_inx_implied(CPU *cpu, uint8_t *mem)
 {
     (void)mem;
     cpu->X++;
-    cpu->Z = (cpu->X == 0);
-    cpu->N = (cpu->X & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->X);
     return 2;
 }
 
@@ -435,8 +394,7 @@ int op_iny_implied(CPU *cpu, uint8_t *mem)
 {
     (void)mem;
     cpu->Y++;
-    cpu->Z = (cpu->Y == 0);
-    cpu->N = (cpu->Y & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->Y);;
     return 2;
 }
 
@@ -445,8 +403,7 @@ int op_dex_implied(CPU *cpu, uint8_t *mem)
 {
     (void)mem;
     cpu->X--;
-    cpu->Z = (cpu->X == 0);
-    cpu->N = (cpu->X & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->X);
     return 2;
 }
 
@@ -455,8 +412,7 @@ int op_dey_implied(CPU *cpu, uint8_t *mem)
 {
     (void)mem;
     cpu->Y--;
-    cpu->Z = (cpu->Y == 0);
-    cpu->N = (cpu->Y & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->Y);;
     return 2;
 }
 
@@ -515,8 +471,7 @@ int op_and_immediate(CPU *cpu, uint8_t *mem)
 {
     uint8_t operand = mem[cpu->PC++];
     cpu->A = cpu->A & operand;
-    cpu->Z = (cpu->A == 0);
-    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->A);
     return 2;
 }
 
@@ -526,8 +481,7 @@ int op_and_zeropage(CPU *cpu, uint8_t *mem)
     uint8_t operand = mem[cpu->PC++];
     uint8_t value_to_and = mem[operand];
     cpu->A = cpu->A & value_to_and;
-    cpu->Z = (cpu->A == 0);
-    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->A);
     return 3;
 }
 
@@ -539,8 +493,7 @@ int op_and_absolute(CPU *cpu, uint8_t *mem)
     uint16_t address = (uint16_t)(hi << 8)| lo;
     uint8_t value_to_and = mem[address];
     cpu->A = cpu->A & value_to_and;
-    cpu->Z = (cpu->A == 0);
-    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->A);
     return 4;
 }
 
@@ -549,8 +502,7 @@ int op_and_zero_page_x(CPU *cpu, uint8_t *mem)
 {
     uint8_t address = mem[cpu->PC++];
     cpu->A = cpu->A & mem[(uint8_t)(address + cpu->X)]; //cast as uint8_t to maintain 8 bits and keep zero page.
-    cpu->Z = (cpu->A == 0);
-    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->A);
     return 4;
 }
 
@@ -562,8 +514,7 @@ int op_and_absolute_x(CPU *cpu, uint8_t *mem)
     uint16_t address = (uint16_t)(hi << 8) | lo;
     uint16_t effective_address = (uint16_t)address + cpu->X;
     cpu->A = cpu->A & mem[effective_address];
-    cpu->Z = (cpu->A == 0);
-    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->A);
     int page_crossed = (address & 0xFF00) != (effective_address & 0xFF00);
     return page_crossed ? 5 : 4;
 }
@@ -576,8 +527,7 @@ int op_and_absolute_y(CPU *cpu, uint8_t *mem)
     uint16_t address = (uint16_t)(hi << 8) | lo;
     uint16_t effective_address = (uint16_t)address + cpu->Y;
     cpu->A = cpu->A & mem[effective_address];
-    cpu->Z = (cpu->A == 0);
-    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->A);
     int page_crossed = (address & 0xFF00) != (effective_address & 0xFF00);
     return page_crossed ? 5 : 4;
 }
@@ -591,8 +541,7 @@ int op_and_indirect_x(CPU *cpu, uint8_t *mem)
     uint8_t hi = mem[(uint8_t)pointer + 1];
     uint16_t address = (uint16_t)(hi << 8) | lo;
     cpu->A = cpu->A & mem[(uint16_t)address];
-    cpu->Z = (cpu->A == 0);
-    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->A);
     return 6;
 }
 
@@ -605,8 +554,7 @@ int op_and_indirect_y(CPU *cpu, uint8_t *mem)
     uint16_t address = ((uint16_t)(hi << 8) | lo);
     uint16_t effective_address = (uint16_t)address + cpu->Y;
     cpu->A = cpu->A & mem[effective_address];
-    cpu->Z = (cpu->A == 0);
-    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->A);
     int page_crossed = (address & 0xFF00) != (effective_address & 0xFF00);
     return page_crossed ? 6 : 5;
 }
@@ -616,8 +564,7 @@ int op_ora_immediate(CPU *cpu, uint8_t *mem)
 {
     uint8_t operand = mem[cpu->PC++];
     cpu->A = cpu->A | operand;
-    cpu->Z = (cpu->A == 0);
-    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->A);
     return 2;
 }
 
@@ -627,8 +574,7 @@ int op_ora_zeropage(CPU *cpu, uint8_t *mem)
     uint8_t operand = mem[cpu->PC++];
     uint8_t value_to_or = mem[operand];
     cpu->A = cpu->A | value_to_or;
-    cpu->Z = (cpu->A == 0);
-    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->A);
     return 3;
 }
 
@@ -637,8 +583,7 @@ int op_ora_zero_page_x(CPU *cpu, uint8_t *mem)
 {
     uint8_t address = mem[cpu->PC++];
     cpu->A = cpu->A | mem[(uint8_t)(address + cpu->X)]; //cast as uint8_t to maintain 8 bits and keep zero page.
-    cpu->Z = (cpu->A == 0);
-    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->A);
     return 4;
 }
 
@@ -650,8 +595,7 @@ int op_ora_absolute(CPU *cpu, uint8_t *mem)
     uint16_t address = (uint16_t)(hi << 8)| lo;
     uint8_t value_to_or = mem[address];
     cpu->A = cpu->A | value_to_or;
-    cpu->Z = (cpu->A == 0);
-    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->A);
     return 4;
 }
 
@@ -663,8 +607,7 @@ int op_ora_absolute_x(CPU *cpu, uint8_t *mem)
     uint16_t address = (uint16_t)(hi << 8) | lo;
     uint16_t effective_address = address + cpu->X;
     cpu->A = cpu->A | mem[effective_address];
-    cpu->Z = (cpu->A == 0);
-    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->A);
     int page_crossed = (address & 0xFF00) != (effective_address & 0xFF00);
     return page_crossed ? 5 : 4;
 }
@@ -677,8 +620,7 @@ int op_ora_absolute_y(CPU *cpu, uint8_t *mem)
     uint16_t address = (uint16_t)(hi << 8) | lo;
     uint16_t effective_address = address + cpu->Y;
     cpu->A = cpu->A | mem[effective_address];
-    cpu->Z = (cpu->A == 0);
-    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->A);
     int page_crossed = (address & 0xFF00) != (effective_address & 0xFF00);
     return page_crossed ? 5 : 4;
 }
@@ -692,8 +634,7 @@ int op_ora_indirect_x(CPU *cpu, uint8_t *mem)
     uint8_t hi = mem[(uint8_t)pointer + 1];
     uint16_t address = (uint16_t)(hi << 8) | lo;
     cpu->A = cpu->A | mem[(uint16_t)address];
-    cpu->Z = (cpu->A == 0);
-    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    update_zero_negative_flags(cpu, cpu->A);
     return 6;
 }
 
