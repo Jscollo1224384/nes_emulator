@@ -2701,10 +2701,7 @@ void test_TAX_sets_zero_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.Z
-
-
-    = 0;
+    clear_flag(&cpu, FLAG_Z);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000010, cpu.P);
@@ -2724,7 +2721,7 @@ void test_TAX_sets_negative_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.N = 0;
+    clear_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -2743,7 +2740,7 @@ void test_TAX_clears_zero_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.Z = 1;
+    set_flag(&cpu, FLAG_Z);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -2763,7 +2760,7 @@ void test_TAX_clears_negative_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.N = 1;
+    set_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -2841,7 +2838,7 @@ void test_TAY_sets_zero_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.Z = 0;
+    clear_flag(&cpu, FLAG_Z);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000010, cpu.P);
@@ -2861,7 +2858,7 @@ void test_TAY_sets_negative_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.N = 0;
+    clear_flag(&cpu, FLAG_N);
 
     cpu_step(&cpu, mem);
 
@@ -2882,7 +2879,7 @@ void test_TAY_clears_zero_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.Z = 1;
+    set_flag(&cpu, FLAG_Z);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -2902,7 +2899,7 @@ void test_TAY_clears_negative_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.N = 1;
+    set_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -2980,7 +2977,7 @@ void test_TXA_sets_zero_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.Z = 0;
+    clear_flag(&cpu, FLAG_Z);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000010, cpu.P);
@@ -3000,7 +2997,7 @@ void test_TXA_sets_negative_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.N = 0;
+    clear_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -3020,7 +3017,7 @@ void test_TXA_clears_zero_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.Z = 1;
+    set_flag(&cpu, FLAG_Z);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -3040,7 +3037,7 @@ void test_TXA_clears_negative_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.N = 1;
+    set_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -3118,7 +3115,7 @@ void test_TYA_sets_zero_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.Z = 0;
+    clear_flag(&cpu, FLAG_Z);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000010, cpu.P);
@@ -3138,7 +3135,7 @@ void test_TYA_sets_negative_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.N = 0;
+    clear_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -3158,7 +3155,7 @@ void test_TYA_clears_zero_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.Z = 1;
+    set_flag(&cpu, FLAG_Z);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -3178,7 +3175,7 @@ void test_TYA_clears_negative_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.N = 1;
+    set_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -3284,7 +3281,7 @@ void test_TSX_clears_zero_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu.SP = 0x01;
-    cpu.Z = 1;
+    set_flag(&cpu, FLAG_Z);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -3302,7 +3299,7 @@ void test_TSX_clears_negative_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu.SP = 0x01;
-    cpu.N = 1;
+    set_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -3499,7 +3496,7 @@ void test_PLA_clears_zero_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu.SP = 0xFC;
-    cpu.Z = 1;
+    set_flag(&cpu, FLAG_Z);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -3518,7 +3515,7 @@ void test_PLA_clears_negative_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu.SP = 0xFC;
-    cpu.N = 1;
+    set_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -3600,15 +3597,12 @@ void test_PLP_pulls_processor_status_from_stack(void) {
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.N = 1;
+    set_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
-    // cpu.I and cpu.B are set from pulling processor status after reset.
-    TEST_ASSERT_EQUAL(1, cpu.I);
-    TEST_ASSERT_EQUAL(1, cpu.B);
-    TEST_ASSERT_EQUAL(0,cpu.N);
+    TEST_ASSERT_BITS(FLAG_I, 0b00000100, cpu.P);
+    TEST_ASSERT_BITS(FLAG_N, 0b00000000, cpu.P);
 }
-
 void test_PLP_increments_stack_pointer(void)
 {
     CPU cpu;
@@ -3705,7 +3699,7 @@ void test_INX_clears_zero_flag(void)
     mem[0x8000] = 0xE8;
 
     cpu_reset(&cpu, mem);
-    cpu.Z = 1;
+    set_flag(&cpu, FLAG_Z);
     cpu.X = 0x00;
     cpu_step(&cpu, mem);
 
@@ -3723,7 +3717,7 @@ void test_INX_clears_negative_flag(void)
     mem[0x8000] = 0xE8;
 
     cpu_reset(&cpu, mem);
-    cpu.N = 1;
+    set_flag(&cpu, FLAG_N);
     cpu.X = 0x00;
     cpu_step(&cpu, mem);
 
@@ -3823,7 +3817,7 @@ void test_INY_clears_zero_flag(void)
     mem[0x8000] = 0xC8;
 
     cpu_reset(&cpu, mem);
-    cpu.Z = 1;
+    set_flag(&cpu, FLAG_Z);
     cpu.Y = 0x00;
     cpu_step(&cpu, mem);
 
@@ -3841,7 +3835,7 @@ void test_INY_clears_negative_flag(void)
     mem[0x8000] = 0xC8;
 
     cpu_reset(&cpu, mem);
-    cpu.N = 1;
+    set_flag(&cpu, FLAG_N);
     cpu.Y = 0x00;
     cpu_step(&cpu, mem);
 
@@ -3941,7 +3935,7 @@ void test_DEX_clears_zero_flag(void)
     mem[0x8000] = 0xCA;
 
     cpu_reset(&cpu, mem);
-    cpu.Z = 1;
+    set_flag(&cpu, FLAG_Z);
     cpu.X = 0x02;
     cpu_step(&cpu, mem);
 
@@ -3959,7 +3953,7 @@ void test_DEX_clears_negative_flag(void)
     mem[0x8000] = 0xCA;
 
     cpu_reset(&cpu, mem);
-    cpu.N = 1;
+    set_flag(&cpu, FLAG_N);
     cpu.X = 0x80;
     cpu_step(&cpu, mem);
 
@@ -4059,7 +4053,7 @@ void test_DEY_clears_zero_flag(void)
     mem[0x8000] = 0x88;
 
     cpu_reset(&cpu, mem);
-    cpu.Z = 1;
+    set_flag(&cpu, FLAG_Z);
     cpu.Y = 0x02;
     cpu_step(&cpu, mem);
 
@@ -4077,7 +4071,7 @@ void test_DEY_clears_negative_flag(void)
     mem[0x8000] = 0x88;
 
     cpu_reset(&cpu, mem);
-    cpu.N = 1;
+    set_flag(&cpu, FLAG_N);
     cpu.Y = 0x80;
     cpu_step(&cpu, mem);
 
@@ -4408,7 +4402,7 @@ void test_AND_immediate_sets_negative_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.N = 0;
+    clear_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -4429,7 +4423,7 @@ void test_AND_immediate_clears_zero_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.Z = 1;
+    set_flag(&cpu, FLAG_Z);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -4450,7 +4444,7 @@ void test_AND_immediate_clears_negative_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.N = 1;
+    set_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -4533,7 +4527,7 @@ void test_AND_zeropage_sets_negative_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.N = 0;
+    clear_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -4555,7 +4549,7 @@ void test_AND_zeropage_clears_zero_flag(void) {
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.Z = 1;
+    set_flag(&cpu, FLAG_Z);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -4577,7 +4571,7 @@ void test_AND_zeropage_clears_negative_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.N = 1;
+    set_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -4664,7 +4658,7 @@ void test_AND_absolute_sets_negative_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.N = 0;
+    clear_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -4687,7 +4681,7 @@ void test_AND_absolute_clears_zero_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.Z = 1;
+    set_flag(&cpu, FLAG_Z);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -4710,7 +4704,7 @@ void test_AND_absolute_clears_negative_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.N = 1;
+    set_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -4798,7 +4792,7 @@ void test_AND_zeropage_x_sets_negative_flag(void)
     cpu_reset(&cpu, mem);
     cpu.X = 0x05;
     cpu_step(&cpu, mem);
-    cpu.N = 0;
+    clear_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -4821,7 +4815,7 @@ void test_AND_zeropage_x_clears_zero_flag(void)
     cpu_reset(&cpu, mem);
     cpu.X = 0x05;
     cpu_step(&cpu, mem);
-    cpu.Z = 1;
+    set_flag(&cpu, FLAG_Z);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -4844,7 +4838,7 @@ void test_AND_zeropage_x_clears_negative_flag(void)
     cpu_reset(&cpu, mem);
     cpu.X = 0x05;
     cpu_step(&cpu, mem);
-    cpu.N = 1;
+    set_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -4955,7 +4949,7 @@ void test_AND_absolute_x_sets_negative_flag(void)
     cpu_reset(&cpu, mem);
     cpu.X = 0x05;
     cpu_step(&cpu, mem);
-    cpu.N = 0;
+    clear_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -4979,7 +4973,7 @@ void test_AND_absolute_x_clears_zero_flag(void)
     cpu_reset(&cpu, mem);
     cpu.X = 0x05;
     cpu_step(&cpu, mem);
-    cpu.Z = 1;
+    set_flag(&cpu, FLAG_Z);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -5003,7 +4997,7 @@ void test_AND_absolute_x_clears_negative_flag(void)
     cpu_reset(&cpu, mem);
     cpu.X = 0x05;
     cpu_step(&cpu, mem);
-    cpu.N = 1;
+    set_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -5117,7 +5111,7 @@ void test_AND_absolute_y_sets_negative_flag(void)
     cpu_reset(&cpu, mem);
     cpu.Y = 0x05;
     cpu_step(&cpu, mem);
-    cpu.N = 0;
+    clear_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -5141,7 +5135,7 @@ void test_AND_absolute_y_clears_zero_flag(void)
     cpu_reset(&cpu, mem);
     cpu.Y = 0x05;
     cpu_step(&cpu, mem);
-    cpu.Z = 1;
+    set_flag(&cpu, FLAG_Z);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -5165,7 +5159,7 @@ void test_AND_absolute_y_clears_negative_flag(void)
     cpu_reset(&cpu, mem);
     cpu.Y = 0x05;
     cpu_step(&cpu, mem);
-    cpu.N = 1;
+    set_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -5282,7 +5276,7 @@ void test_AND_indirect_x_sets_negative_flag(void)
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
     cpu.X = 0x05;
-    cpu.N = 0;
+    clear_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -5307,7 +5301,7 @@ void test_AND_indirect_x_clears_zero_flag(void)
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
     cpu.X = 0x05;
-    cpu.Z = 1;
+    set_flag(&cpu, FLAG_Z);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -5332,7 +5326,7 @@ void test_AND_indirect_x_clears_negative_flag(void)
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
     cpu.X = 0x05;
-    cpu.N = 1;
+    set_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -5428,7 +5422,7 @@ void test_AND_indirect_y_sets_negative_flag(void)
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
     cpu.Y = 0x05;
-    cpu.N = 0;
+    clear_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -5453,7 +5447,7 @@ void test_AND_indirect_y_clears_zero_flag(void)
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
     cpu.Y = 0x05;
-    cpu.Z = 1;
+    set_flag(&cpu, FLAG_Z);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -5478,7 +5472,7 @@ void test_AND_indirect_y_clears_negative_flag(void)
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
     cpu.Y = 0x05;
-    cpu.N = 1;
+    set_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -5565,7 +5559,7 @@ void test_ORA_immediate_sets_zero_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.Z = 0;
+    clear_flag(&cpu, FLAG_Z);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000010, cpu.P);
@@ -5626,7 +5620,7 @@ void test_ORA_immediate_clears_negative_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.N = 1;
+    set_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -5688,7 +5682,7 @@ void test_ORA_zeropage_sets_zero_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.Z = 0;
+    clear_flag(&cpu, FLAG_Z);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000010, cpu.P);
@@ -5752,7 +5746,7 @@ void test_ORA_zeropage_clears_negative_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.N = 1;
+    set_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -5817,7 +5811,7 @@ void test_ORA_zeropage_x_sets_zero_flag(void)
     cpu_reset(&cpu, mem);
     cpu.X = 0x05;
     cpu_step(&cpu, mem);
-    cpu.Z = 0;
+    clear_flag(&cpu, FLAG_Z);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000010, cpu.P);
@@ -5885,7 +5879,7 @@ void test_ORA_zeropage_x_clears_negative_flag(void)
     cpu_reset(&cpu, mem);
     cpu.X = 0x05;
     cpu_step(&cpu, mem);
-    cpu.N = 1;
+    set_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -5972,7 +5966,7 @@ void test_ORA_absolute_sets_zero_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.Z = 0;
+    clear_flag(&cpu, FLAG_Z);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000010, cpu.P);
@@ -5995,7 +5989,7 @@ void test_ORA_absolute_sets_negative_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.Z = 0;
+    clear_flag(&cpu, FLAG_Z);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -6040,7 +6034,7 @@ void test_ORA_absolute_clears_negative_flag(void)
 
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
-    cpu.N = 1;
+    set_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -6105,7 +6099,7 @@ void test_ORA_absolute_x_sets_zero_flag(void)
     cpu_reset(&cpu, mem);
     cpu.X = 0x05;
     cpu_step(&cpu, mem);
-    cpu.Z = 0;
+    clear_flag(&cpu, FLAG_Z);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000010, cpu.P);
@@ -6172,7 +6166,7 @@ void test_ORA_absolute_x_clears_negative_flag(void)
     cpu_reset(&cpu, mem);
     cpu.X = 0x05;
     cpu_step(&cpu, mem);
-    cpu.N = 1;
+    set_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -6260,7 +6254,7 @@ void test_ORA_absolute_y_sets_zero_flag(void)
     cpu_reset(&cpu, mem);
     cpu.Y = 0x05;
     cpu_step(&cpu, mem);
-    cpu.Z = 0;
+    clear_flag(&cpu, FLAG_Z);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000010, cpu.P);
@@ -6330,7 +6324,7 @@ void test_ORA_absolute_y_clears_negative_flag(void)
     cpu_reset(&cpu, mem);
     cpu.Y = 0x05;
     cpu_step(&cpu, mem);
-    cpu.N = 1;
+    set_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
@@ -6423,7 +6417,7 @@ void test_ORA_indirect_x_sets_zero_flag(void)
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
     cpu.X = 0x05;
-    cpu.Z = 0;
+    clear_flag(&cpu, FLAG_Z);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000010, cpu.P);
@@ -6497,7 +6491,7 @@ void test_ORA_indirect_x_clears_negative_flag(void)
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
     cpu.X = 0x05;
-    cpu.N = 1;
+    set_flag(&cpu, FLAG_N);
     cpu_step(&cpu, mem);
 
     TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
