@@ -68,6 +68,33 @@ int op_lda_absolute_y(CPU *cpu, uint8_t *mem)
     return page_crossed ? 5 : 4;
 }
 
+// LDA indirect X (0xA1) - Takes the next byte from a zero page address, adds the X register as an offset (wrapping within zero page) that holds a pointer to the value to load into the accumulator.
+int op_lda_indirect_x(CPU *cpu, uint8_t *mem)
+{
+    uint8_t operand = mem[cpu->PC++];
+    uint8_t pointer = (uint8_t)(operand + cpu->X);
+    uint8_t lo = mem[pointer];
+    uint8_t hi = mem[(uint8_t)(pointer + 1)];
+    uint16_t address = (uint16_t)(hi << 8) | lo;
+    cpu->A = mem[address];
+    update_zero_negative_flags(cpu, cpu->A);
+    return 6;
+}
+
+// LDA indirect Y (0xB1) - Takes a zero page address, reads a 16-bit pointer from it, adds the Y register as an offset to that pointer (accounting for page cross), and loads the value at the resulting address into the accumulator.
+int op_lda_indirect_y(CPU *cpu, uint8_t *mem)
+{
+    uint8_t operand = mem[cpu->PC++];
+    uint8_t lo = mem[operand];
+    uint8_t hi = mem[(uint8_t)(operand + 1)];
+    uint16_t address = ((uint16_t)(hi << 8) | lo);
+    uint16_t effective_address = (uint16_t)address + cpu->Y;
+    cpu->A = mem[effective_address];
+    update_zero_negative_flags(cpu, cpu->A);
+    int page_crossed = (address & 0xFF00) != (effective_address & 0xFF00);
+    return page_crossed ? 6 : 5;
+}
+
 // STA zero page (0x85) - Store accumulator to zero page memory
 int op_sta_zero_page(CPU *cpu, uint8_t *mem)
 {
@@ -638,6 +665,20 @@ int op_ora_indirect_x(CPU *cpu, uint8_t *mem)
     return 6;
 }
 
+// ORA indirect Y (0x11) - Takes a zero page address, reads a 16-bit pointer from it, adds the Y register as an offset to that pointer (accounting for page cross), and ORs the value at the resulting address with the accumulator.
+int op_ora_indirect_y(CPU *cpu, uint8_t *mem)
+{
+    uint8_t operand = mem[cpu->PC++];
+    uint8_t lo = mem[operand];
+    uint8_t hi = mem[(uint8_t)(operand + 1)];
+    uint16_t address = ((uint16_t)(hi << 8) | lo);
+    uint16_t effective_address = (uint16_t)address + cpu->Y;
+    cpu->A = cpu->A | mem[effective_address];
+    update_zero_negative_flags(cpu, cpu->A);
+    int page_crossed = (address & 0xFF00) != (effective_address & 0xFF00);
+    return page_crossed ? 6 : 5;
+}
+
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -655,6 +696,8 @@ const OpcodeEntry opcode_table[256] = {
     [0xB5] = { op_lda_zero_page_x, "LDA zero page X" },
     [0xBD] = { op_lda_absolute_x,  "LDA absolute X"  },
     [0xB9] = { op_lda_absolute_y,  "LDA absolute Y"  },
+    [0xA1] = { op_lda_indirect_x,  "LDA indirect X"  },
+    [0xB1] = { op_lda_indirect_y,  "LDA indirect Y"  },
     [0x85] = { op_sta_zero_page,   "STA zero page"   },
     [0x95] = { op_sta_zero_page_x, "STA zero page X" },
     [0x8D] = { op_sta_absolute,    "STA absolute"    },
@@ -710,5 +753,6 @@ const OpcodeEntry opcode_table[256] = {
     [0x0D] = { op_ora_absolute,    "ORA Absolute"    },
     [0x1D] = { op_ora_absolute_x,  "ORA absolute X"  },
     [0x19] = { op_ora_absolute_y,  "ORA absolute Y"  },
-    [0x01] = { op_ora_indirect_x,  "ORA indirect X"  }
+    [0x01] = { op_ora_indirect_x,  "ORA indirect X"  },
+    [0x11] = { op_ora_indirect_y,  "ORA indirect Y"  },
 };
