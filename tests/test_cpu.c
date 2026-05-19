@@ -7001,6 +7001,127 @@ void test_ORA_indirect_y_returns_six_cycles_on_page_cross(void)
     TEST_ASSERT_EQUAL(6, cycle);
 }
 
+/** EOR immediate tests *************************************************************************************************/
+void test_EOR_immediate_performs_eor_operation(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b00000010; //0x02
+    mem[0x8002] = 0x49;
+    mem[0x8003] = 0b01000000; //0x40
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0b01000010 /*0x42*/, cpu.A);
+}
+
+void test_EOR_immediate_sets_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b01000010; //0x42
+    mem[0x8002] = 0x49;
+    mem[0x8003] = 0b01000010; //0x42
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_BITS(FLAG_Z, 0b00000010, cpu.P);
+    TEST_ASSERT_BITS(FLAG_N, 0b00000000, cpu.P);
+}
+
+void test_EOR_immediate_sets_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b01000010; //0x42
+    mem[0x8002] = 0x49;
+    mem[0x8003] = 0b11000010; //0x80
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
+    TEST_ASSERT_BITS(FLAG_N, 0b10000000, cpu.P);
+}
+
+void test_EOR_immediate_clears_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b00000000; //0x00
+    mem[0x8002] = 0x49;
+    mem[0x8003] = 0b01000010; //0x42
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    set_flag(&cpu, FLAG_Z);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
+    TEST_ASSERT_BITS(FLAG_N, 0b00000000, cpu.P);
+}
+
+void test_EOR_immediate_clears_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b10000000; //0x80
+    mem[0x8002] = 0x49;
+    mem[0x8003] = 0b10000001; //0x81
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    set_flag(&cpu, FLAG_N);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
+    TEST_ASSERT_BITS(FLAG_N, 0b00000000, cpu.P);
+}
+
+void test_EOR_immediate_returns_two_cycles(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b00000010; //0x02
+    mem[0x8002] = 0x49;
+    mem[0x8003] = 0b01000000; //0x40
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    int cycle = cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(2, cycle);
+}
+
 int main(void) {
 
     UNITY_BEGIN();
@@ -7508,5 +7629,15 @@ int main(void) {
     RUN_TEST(test_ORA_indirect_y_clears_negative_flag);
     RUN_TEST(test_ORA_indirect_y_returns_five_cycles);
     RUN_TEST(test_ORA_indirect_y_returns_six_cycles_on_page_cross);
+
+    //EOR Tests
+    //Addressing Modes
+    //Immediate
+    RUN_TEST(test_EOR_immediate_performs_eor_operation);
+    RUN_TEST(test_EOR_immediate_sets_zero_flag);
+    RUN_TEST(test_EOR_immediate_sets_negative_flag);
+    RUN_TEST(test_EOR_immediate_clears_zero_flag);
+    RUN_TEST(test_EOR_immediate_clears_negative_flag);
+    RUN_TEST(test_EOR_immediate_returns_two_cycles);
     return UNITY_END();
 }
