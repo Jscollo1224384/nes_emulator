@@ -688,6 +688,16 @@ int op_eor_immediate(CPU *cpu, uint8_t *mem)
     return 2;
 }
 
+// EOR zero-page (0x45) - Takes the next byte and does an XOR operation on the value stored in the accumulator from a zero-page address.
+int op_eor_zeropage(CPU *cpu, uint8_t *mem)
+{
+    uint8_t operand = mem[cpu->PC++];
+    uint8_t value_to_and = mem[operand];
+    cpu->A = cpu->A ^ value_to_and;
+    update_zero_negative_flags(cpu, cpu->A);
+    return 3;
+}
+
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -764,5 +774,6 @@ const OpcodeEntry opcode_table[256] = {
     [0x19] = { op_ora_absolute_y,  "ORA absolute Y"  },
     [0x01] = { op_ora_indirect_x,  "ORA indirect X"  },
     [0x11] = { op_ora_indirect_y,  "ORA indirect Y"  },
-    [0x49] = { op_eor_immediate,   "EOR immediate"   }
+    [0x49] = { op_eor_immediate,   "EOR immediate"   },
+    [0x45] = { op_eor_zeropage,    "EOR zero page"   }
 };
