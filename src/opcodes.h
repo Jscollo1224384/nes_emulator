@@ -85,6 +85,7 @@ int op_lda_indirect_x(CPU *cpu, uint8_t *mem);
 int op_lda_indirect_y(CPU *cpu, uint8_t *mem);
 int op_eor_immediate(CPU *cpu, uint8_t *mem);
 int op_eor_zeropage(CPU *cpu, uint8_t *mem);
+int op_eor_zeropage_x(CPU *cpu, uint8_t *mem);
 
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem);
