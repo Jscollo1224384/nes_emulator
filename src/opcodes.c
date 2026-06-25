@@ -698,6 +698,15 @@ int op_eor_zeropage(CPU *cpu, uint8_t *mem)
     return 3;
 }
 
+// EOR zero-page (0x55) - Takes the next byte as a zero page address, adds the X register as an offset (wrapping within zero page), and EORs the value at that address with the accumulator.
+int op_eor_zeropage_x(CPU *cpu, uint8_t *mem)
+{
+    uint8_t address = mem[cpu->PC++];
+    cpu->A = cpu->A ^ mem[(uint8_t)(address + cpu->X)]; //cast as uint8_t to maintain 8 bits and keep zero page.
+    update_zero_negative_flags(cpu, cpu->A);
+    return 4;
+}
+
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -775,5 +784,6 @@ const OpcodeEntry opcode_table[256] = {
     [0x01] = { op_ora_indirect_x,  "ORA indirect X"  },
     [0x11] = { op_ora_indirect_y,  "ORA indirect Y"  },
     [0x49] = { op_eor_immediate,   "EOR immediate"   },
-    [0x45] = { op_eor_zeropage,    "EOR zero page"   }
+    [0x45] = { op_eor_zeropage,    "EOR zero page"   },
+    [0x55] = { op_eor_zeropage_x, "EOR zero page X" }
 };
