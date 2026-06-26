@@ -707,6 +707,18 @@ int op_eor_zeropage_x(CPU *cpu, uint8_t *mem)
     return 4;
 }
 
+// EOR absolute (0x4D) - Takes the next byte and does an EOR operation on the value stored in the accumulator from a 16-bit address.
+int op_eor_absolute(CPU *cpu, uint8_t *mem)
+{
+    uint8_t lo = mem[cpu->PC++];
+    uint8_t hi = mem[cpu->PC++];
+    uint16_t address = (uint16_t)(hi << 8)| lo;
+    uint8_t value_to_eor = mem[address];
+    cpu->A = cpu->A ^ value_to_eor;
+    update_zero_negative_flags(cpu, cpu->A);
+    return 4;
+}
+
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -785,5 +797,6 @@ const OpcodeEntry opcode_table[256] = {
     [0x11] = { op_ora_indirect_y,  "ORA indirect Y"  },
     [0x49] = { op_eor_immediate,   "EOR immediate"   },
     [0x45] = { op_eor_zeropage,    "EOR zero page"   },
-    [0x55] = { op_eor_zeropage_x, "EOR zero page X" }
+    [0x55] = { op_eor_zeropage_x,  "EOR zero page X" },
+    [0x4d] = { op_eor_absolute,    "EOR Absolute"    }
 };
