@@ -732,6 +732,18 @@ int op_eor_absolute_x(CPU *cpu, uint8_t *mem)
     return page_crossed ? 5 : 4;
 }
 
+int op_eor_absolute_y(CPU *cpu, uint8_t *mem)
+{
+    uint8_t lo = mem[cpu->PC++];
+    uint8_t hi = mem[cpu->PC++];
+    uint16_t address = (uint16_t)(hi << 8) | lo;
+    uint16_t effective_address = address + cpu->Y;
+    cpu->A = cpu->A ^ mem[effective_address];
+    update_zero_negative_flags(cpu, cpu->A);
+    int page_crossed = (address & 0xFF00) != (effective_address & 0xFF00);
+    return page_crossed ? 5 : 4;
+}
+
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -812,5 +824,6 @@ const OpcodeEntry opcode_table[256] = {
     [0x45] = { op_eor_zeropage,    "EOR zero page"   },
     [0x55] = { op_eor_zeropage_x,  "EOR zero page X" },
     [0x4d] = { op_eor_absolute,    "EOR Absolute"    },
-    [0x5d] = { op_eor_absolute_x,  "EOR Absolute X"  }
+    [0x5d] = { op_eor_absolute_x,  "EOR Absolute X"  },
+    [0x59] = { op_eor_absolute_y,  "EOR Absolute Y"  }
 };
