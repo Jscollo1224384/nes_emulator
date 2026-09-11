@@ -744,6 +744,19 @@ int op_eor_absolute_y(CPU *cpu, uint8_t *mem)
     return page_crossed ? 5 : 4;
 }
 
+// EOR indirect X (0x41) - Takes the next byte from a zero page address, adds the X register as an offset (wrapping within zero page) that holds a pointer to the value to be EORed  with the accumulator.
+int op_eor_indirect_x(CPU *cpu, uint8_t *mem)
+{
+    uint8_t operand = mem[cpu->PC++];
+    uint8_t pointer = (uint8_t)(operand + cpu->X);
+    uint8_t lo = mem[pointer];
+    uint8_t hi = mem[(uint8_t)(pointer + 1)];
+    uint16_t address = (uint16_t)(hi << 8) | lo;
+    cpu->A = cpu->A ^ mem[(uint16_t)address];
+    update_zero_negative_flags(cpu, cpu->A);
+    return 6;
+}
+
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -825,5 +838,6 @@ const OpcodeEntry opcode_table[256] = {
     [0x55] = { op_eor_zeropage_x,  "EOR zero page X" },
     [0x4d] = { op_eor_absolute,    "EOR Absolute"    },
     [0x5d] = { op_eor_absolute_x,  "EOR Absolute X"  },
-    [0x59] = { op_eor_absolute_y,  "EOR Absolute Y"  }
+    [0x59] = { op_eor_absolute_y,  "EOR Absolute Y"  },
+    [0x41] = { op_eor_indirect_x,  "EOR Indirect X"  }
 };
