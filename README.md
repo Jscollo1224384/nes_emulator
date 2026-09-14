@@ -34,15 +34,16 @@
 
 The project has established a solid foundation with:
 
-- ✅ **CPU Core**: Complete CPU struct with registers (A, X, Y, SP, PC) and status flags (N, V, B, D, I, Z, C)
+- ✅ **CPU Core**: Complete CPU struct with registers (A, X, Y, SP, PC) and packed status register (P) with helper functions for flag access
 - ✅ **Opcode Dispatch**: 256-entry lookup table with function pointer handlers in `opcodes.c` (20KB)
 - ✅ **Reset Logic**: Proper CPU initialization including reset vector loading from `$FFFC/$FFFD`
 - ✅ **Step Execution**: Single instruction execution with cycle counting
-- ✅ **Test Framework**: Unity test framework fully integrated with comprehensive CPU test suite (121KB)
+- ✅ **Test Framework**: Unity test framework fully integrated with comprehensive CPU test suite (324 passing tests)
 - ✅ **Build Systems**: Both Make (Windows MinGW) and CMake (cross-platform) configurations
 - ✅ **Code Structure**: Clean modular design following the documented architecture
+- ✅ **Status Flags Refactoring**: Packed status register implementation matching 6502 hardware design
 
-**Next Steps**: Complete opcode implementations and validate against nestest ROM.
+**Next Steps**: Complete remaining opcodes (arithmetic, shifts, branches, status operations) and validate against nestest ROM.
 
 ---
 
@@ -230,8 +231,8 @@ void test_LDA_immediate_sets_zero_flag(void) {
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
 
-    TEST_ASSERT_EQUAL(1, cpu.Z);
-    TEST_ASSERT_EQUAL(0, cpu.N);
+    TEST_ASSERT_EQUAL(1, get_flag(&cpu, FLAG_Z));
+    TEST_ASSERT_EQUAL(0, get_flag(&cpu, FLAG_N));
 }
 
 int main(void) {
@@ -264,7 +265,7 @@ The CPU is the safest place to start because it is completely self-contained and
 
 **What to build:**
 
-- `CPU` struct: registers `A`, `X`, `Y`, `SP`, `PC`; status flags `N`, `V`, `B`, `D`, `I`, `Z`, `C`
+- `CPU` struct: registers `A`, `X`, `Y`, `SP`, `PC`; packed status register `P` with helper functions (set_flag, clear_flag, update_zero_negative_flags)
 - `cpu_reset()` — load PC from reset vector at `$FFFC/$FFFD`
 - `cpu_step()` — fetch opcode, decode, execute, return cycles consumed
 - All official opcodes (~151) with correct cycle counts
@@ -556,8 +557,7 @@ extern const OpcodeEntry opcode_table[256];
 // opcodes.c — each handler fetches its own operand bytes
 int op_lda_immediate(CPU *cpu, uint8_t *mem) {
     cpu->A = mem[cpu->PC++];
-    cpu->Z = (cpu->A == 0);
-    cpu->N = (cpu->A & 0x80) ? 1 : 0;
+    update_zero_negative_flags(&cpu, cpu->A);
     return 2;
 }
 
@@ -583,16 +583,28 @@ Key rules for handlers:
 
 #include <stdint.h>
 
+// Status flag bit positions (6502 standard)
+#define FLAG_N (1 << 7)  // Negative
+#define FLAG_V (1 << 6)  // Overflow
+#define FLAG_U (1 << 5)  // Unused (always 1)
+#define FLAG_B (1 << 4)  // Break
+#define FLAG_D (1 << 3)  // Decimal (unused in NES)
+#define FLAG_I (1 << 2)  // Interrupt disable
+#define FLAG_Z (1 << 1)  // Zero
+#define FLAG_C (1 << 0)  // Carry
+
 typedef struct {
     uint8_t  A, X, Y, SP;
     uint16_t PC;
-    // Status flags
-    uint8_t N, V, B, D, I, Z, C;
+    uint8_t P; // Packed status register
     uint64_t cycles;
 } CPU;
 
 void cpu_reset(CPU *cpu, uint8_t *mem);
 int  cpu_step(CPU *cpu, uint8_t *mem);   // returns cycles consumed
+void set_flag(CPU *cpu, uint8_t flag);
+void clear_flag(CPU *cpu, uint8_t flag);
+void update_zero_negative_flags(CPU *cpu, uint8_t register_value);
 
 #endif
 ```
@@ -606,23 +618,21 @@ Use this to track progress. Each milestone should have passing tests before you 
 - [x] **M1** — Unity test framework wired up; build system configured with both Make and CMake
 - [x] **M2** — CPU core structure implemented with reset and step functions
 - [x] **M3** — Opcode dispatch system with 256-entry lookup table implemented
-- [x] **M4** — Comprehensive CPU test suite with 121KB of test coverage
-  - **Completed Instruction Sets (42 opcodes):**
-    - **Load Operations:** LDA, LDX, LDY (all addressing modes)
-    - **Store Operations:** STA, STX, STY (all addressing modes) 
-    - **Transfer Operations:** TAX, TAY, TXA, TYA, TSX, TXS
-    - **Stack Operations:** PHA, PLA, PHP, PLP
-    - **Increment/Decrement:** INX, INY, DEX, DEY
-    - **Jump Operations:** JMP (absolute, indirect), JSR, RTS
-    - **Logical Operations:** AND (5/8 addressing modes completed)
-    - ✅ Completed: immediate, zero page, absolute, zero page X, absolute X
-    - 🔄 Remaining: absolute Y, indirect X/Y
-  - **Remaining Instruction Sets (109 opcodes):**
-    - **Logical Operations:** ORA, EOR, BIT (remaining addressing modes)
+- [x] **M4** — Comprehensive CPU test suite with 324 passing tests
+  - **Completed Instruction Sets (73 opcodes):**
+    - **Load Operations:** LDA, LDX, LDY (all addressing modes) ✅
+    - **Store Operations:** STA, STX, STY (all addressing modes) ✅
+    - **Transfer Operations:** TAX, TAY, TXA, TYA, TSX, TXS ✅
+    - **Stack Operations:** PHA, PLA, PHP, PLP ✅
+    - **Increment/Decrement:** INX, INY, DEX, DEY ✅
+    - **Jump Operations:** JMP (absolute, indirect), JSR, RTS ✅
+    - **Logical Operations:** AND, ORA, EOR (all addressing modes) ✅
+  - **Remaining Instruction Sets (~78 opcodes):**
     - **Arithmetic Operations:** ADC, SBC, CMP, CPX, CPY
     - **Shift/Rotate Operations:** ASL, LSR, ROL, ROR
     - **Branch Operations:** BCC, BCS, BEQ, BNE, BMI, BPL, BVC, BVS
     - **Status Flag Operations:** CLC, CLD, CLI, CLV, SEC, SED, SEI
+    - **Logical Operations:** BIT
     - **Jump/Subroutine:** BRK, RTI
     - **No-Operation:** NOP
 - [ ] **M5** — All 151 official opcodes passing; nestest.log diff is clean
