@@ -7801,7 +7801,6 @@ void test_EOR_absolute_y_returns_four_cycles(void)
     TEST_ASSERT_EQUAL(4, cycle);
 }
 
-/** EOR Indirect X Tests *******************************************************************************************/
 void test_EOR_absolute_y_returns_five_cycles_when_page_crossed(void)
 {
     CPU cpu;
@@ -7823,6 +7822,7 @@ void test_EOR_absolute_y_returns_five_cycles_when_page_crossed(void)
     TEST_ASSERT_EQUAL(5, cycle);
 }
 
+/** EOR Indirect X Tests *******************************************************************************************/
 void test_EOR_indirect_x_eors_accumulator_with_indexed_indirect_value(void)
 {
     CPU cpu;
@@ -7962,6 +7962,174 @@ void test_EOR_indirect_x_returns_six_cycles(void)
     cpu_reset(&cpu, mem);
     cpu_step(&cpu, mem);
     cpu.X = 0x05;
+    int cycle = cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(6, cycle);
+}
+
+/** EOR Indirect Y Tests *******************************************************************************************/
+void test_EOR_indirect_y_ors_accumulator_with_indirect_y_offset_value(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b01000000; //0x40
+    mem[0x8002] = 0x51;
+    mem[0x8003] = 0x00;
+    mem[0x0000] = 0x00;
+    mem[0x0001] = 0x20;
+    mem[0x2005] = 0b01000010; //0x42
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu.Y = 0x05;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(0b00000010, cpu.A);
+}
+
+void test_EOR_indirect_y_sets_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b01000010; //0x42
+    mem[0x8002] = 0x51;
+    mem[0x8003] = 0x00;
+    mem[0x0000] = 0x00;
+    mem[0x0001] = 0x20;
+    mem[0x2005] = 0b01000010; //0x42
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu.Y = 0x05;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_BITS(FLAG_Z, 0b00000010, cpu.P);
+    TEST_ASSERT_BITS(FLAG_N, 0b00000000, cpu.P);
+}
+
+void test_EOR_indirect_y_sets_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b00000010; //0x02
+    mem[0x8002] = 0x51;
+    mem[0x8003] = 0x00;
+    mem[0x0000] = 0x00;
+    mem[0x0001] = 0x20;
+    mem[0x2005] = 0b10000010; //0x82
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu.Y = 0x05;
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
+    TEST_ASSERT_BITS(FLAG_N, 0b10000000, cpu.P);
+}
+
+void test_EOR_indirect_y_clears_zero_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b00000000; //0x00
+    mem[0x8002] = 0x51;
+    mem[0x8003] = 0x00;
+    mem[0x0000] = 0x00;
+    mem[0x0001] = 0x20;
+    mem[0x2005] = 0b01000010; //0x42
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu.Y = 0x05;
+    set_flag(&cpu, FLAG_Z);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
+    TEST_ASSERT_BITS(FLAG_N, 0b00000000, cpu.P);
+}
+
+void test_EOR_indirect_y_clears_negative_flag(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b10000000; //0x80
+    mem[0x8002] = 0x51;
+    mem[0x8003] = 0x00;
+    mem[0x0000] = 0x00;
+    mem[0x0001] = 0x20;
+    mem[0x2005] = 0b10000001; //0x81
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu.Y = 0x05;
+    set_flag(&cpu, FLAG_N);
+    cpu_step(&cpu, mem);
+
+    TEST_ASSERT_BITS(FLAG_Z, 0b00000000, cpu.P);
+    TEST_ASSERT_BITS(FLAG_N, 0b00000000, cpu.P);
+}
+
+void test_EOR_indirect_y_returns_five_cycles(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b00000000; //0x00
+    mem[0x8002] = 0x51;
+    mem[0x8003] = 0x00;
+    mem[0x0000] = 0x00;
+    mem[0x0001] = 0x20;
+    mem[0x2005] = 0b00000001; //0x01
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu.Y = 0x05;
+    int cycle = cpu_step(&cpu, mem);
+
+    TEST_ASSERT_EQUAL(5, cycle);
+}
+
+void test_EOR_indirect_y_returns_six_cycles_when_page_crossed(void)
+{
+    CPU cpu;
+    uint8_t mem[0x10000] = {0};
+
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x80;
+    mem[0x8000] = 0xA9;
+    mem[0x8001] = 0b00000000; //0x00
+    mem[0x8002] = 0x51;
+    mem[0x8003] = 0x00;
+    mem[0x0000] = 0xFF;
+    mem[0x0001] = 0x20;
+    mem[0x2104] = 0b00000001; //0x01 — 0x20FF + 0x05 = 0x2104, crosses page boundary
+
+    cpu_reset(&cpu, mem);
+    cpu_step(&cpu, mem);
+    cpu.Y = 0x05;
     int cycle = cpu_step(&cpu, mem);
 
     TEST_ASSERT_EQUAL(6, cycle);
@@ -8533,5 +8701,20 @@ int main(void) {
     RUN_TEST(test_EOR_indirect_x_clears_zero_flag);
     RUN_TEST(test_EOR_indirect_x_clears_negative_flag);
     RUN_TEST(test_EOR_indirect_x_returns_six_cycles);
+
+    //Indirect Y
+    RUN_TEST(test_EOR_indirect_y_ors_accumulator_with_indirect_y_offset_value);
+    RUN_TEST(test_EOR_indirect_y_sets_zero_flag);
+    RUN_TEST(test_EOR_indirect_y_sets_negative_flag);
+    RUN_TEST(test_EOR_indirect_y_clears_zero_flag);
+    RUN_TEST(test_EOR_indirect_y_clears_negative_flag);
+    RUN_TEST(test_EOR_indirect_y_returns_five_cycles);
+    RUN_TEST(test_EOR_indirect_y_returns_six_cycles_when_page_crossed);
+
     return UNITY_END();
 }
+
+
+
+
+

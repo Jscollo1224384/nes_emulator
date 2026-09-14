@@ -757,6 +757,20 @@ int op_eor_indirect_x(CPU *cpu, uint8_t *mem)
     return 6;
 }
 
+// EOR indirect Y (0x51) - Takes a zero page address, reads a 16-bit pointer from it, adds the Y register as an offset to that pointer (accounting for page cross), and EORs the value at the resulting address with the accumulator.
+int op_eor_indirect_y(CPU *cpu, uint8_t *mem)
+{
+    uint8_t operand = mem[cpu->PC++];
+    uint8_t lo = mem[operand];
+    uint8_t hi = mem[(uint8_t)(operand + 1)];
+    uint16_t address = ((uint16_t)(hi << 8) | lo);
+    uint16_t effective_address = (uint16_t)address + cpu->Y;
+    cpu->A = cpu->A ^ mem[effective_address];
+    update_zero_negative_flags(cpu, cpu->A);
+    int page_crossed = (address & 0xFF00) != (effective_address & 0xFF00);
+    return page_crossed ? 6 : 5;
+}
+
 // Default handler for unimplemented opcodes
 int op_unimplemented(CPU *cpu, uint8_t *mem)
 {
@@ -839,5 +853,6 @@ const OpcodeEntry opcode_table[256] = {
     [0x4d] = { op_eor_absolute,    "EOR Absolute"    },
     [0x5d] = { op_eor_absolute_x,  "EOR Absolute X"  },
     [0x59] = { op_eor_absolute_y,  "EOR Absolute Y"  },
-    [0x41] = { op_eor_indirect_x,  "EOR Indirect X"  }
+    [0x41] = { op_eor_indirect_x,  "EOR Indirect X"  },
+    [0x51] = { op_eor_indirect_y,  "EOR Indirect Y"  }
 };
